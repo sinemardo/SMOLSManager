@@ -13,31 +13,36 @@ export default function Catalog() {
   const [message, setMessage] = useState('');
   const user = JSON.parse(localStorage.getItem('smols_user') || '{}');
 
-  // Cargar categorías y sincronizar con URL
+  // 1. Cargar categorías primero
   useEffect(() => {
     api.get('/categories').then(r => {
       const cats = r.data.categories || [];
       setCategories(cats);
       
-      // Leer categoría de URL y encontrar su ID
+      // 2. Después de tener categorías, leer URL y establecer filtro
       const urlParams = new URLSearchParams(window.location.search);
       const catFromUrl = urlParams.get('category');
       if (catFromUrl && cats.length > 0) {
         const found = cats.find(c => 
           c.id === catFromUrl || 
           c.name === catFromUrl || 
-          c.displayName === catFromUrl
+          c.displayName === catFromUrl ||
+          c.name.toLowerCase() === catFromUrl.toLowerCase() ||
+          c.displayName.toLowerCase() === catFromUrl.toLowerCase()
         );
         if (found) {
+          console.log('Categoría encontrada en URL:', found.displayName, found.id);
           setFilter(prev => ({ ...prev, category: found.id }));
         }
       }
     });
   }, []);
 
-  // Cargar productos cuando cambia el filtro
+  // 3. Cargar productos cuando cambia el filtro
   useEffect(() => {
-    loadProducts();
+    if (categories.length > 0) {
+      loadProducts();
+    }
   }, [filter.category, filter.search]);
 
   const loadProducts = async () => {
