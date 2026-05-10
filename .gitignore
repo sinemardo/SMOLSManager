@@ -5,3 +5,5 @@ logs/
 coverage/
 .DS_Store
 .next/
+.next/
+frontend/web/.next/
