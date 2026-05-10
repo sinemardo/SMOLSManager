@@ -11,7 +11,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     api.get('/kpis/dashboard').then(r => setStats(r.data.kpis)).catch(() => {});
-    if (Notification.permission === 'default') Notification.requestPermission();
   }, []);
 
   if (!stats) return <Layout user={user}><div style={{textAlign:'center',padding:80}}>Cargando dashboard...</div></Layout>;
@@ -55,38 +54,49 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Categorías con barra de progreso */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          style={{ background: '#fff', padding: 24, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginBottom: 24 }}>
+        {/* Categorías como cards - diseño original mejorado */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Productos por Categoría</h3>
           {stats.productsByCategory?.length > 0 ? (
-            <div style={{ display: 'grid', gap: 12 }}>
-              {stats.productsByCategory.map(cat => {
-                const total = stats.productsByCategory.reduce((s, c) => s + c.count, 0);
-                const pct = total > 0 ? (cat.count / total) * 100 : 0;
-                return (
-                  <div key={cat.name} onClick={() => navigate('/catalog')} style={{ cursor: 'pointer' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: 14, fontWeight: 500 }}>{cat.name}</span>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#4f46e5' }}>{cat.count} ({Math.round(pct)}%)</span>
-                    </div>
-                    <div style={{ height: 6, background: '#f3f4f6', borderRadius: 3, overflow: 'hidden' }}>
-                      <motion.div initial={{ width: 0 }} animate={{ width: pct + '%' }} transition={{ duration: 0.8, delay: 0.5 }}
-                        style={{ height: '100%', background: '#4f46e5', borderRadius: 3 }} />
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
+              {stats.productsByCategory.map((cat, i) => (
+                <motion.div
+                  key={cat.name}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + (i * 0.05) }}
+                  onClick={() => navigate('/catalog?category=' + cat.name)}
+                  style={{
+                    background: '#fff',
+                    padding: 20,
+                    borderRadius: 16,
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                    border: '2px solid transparent',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#4f46e5'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(79,70,229,0.15)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; }}
+                >
+                  <p style={{ fontSize: 32, fontWeight: 700, color: '#4f46e5', marginBottom: 4 }}>{cat.count}</p>
+                  <p style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>{cat.name}</p>
+                  <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>productos</p>
+                </motion.div>
+              ))}
             </div>
           ) : (
-            <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>No hay productos aún</p>
+            <div style={{ textAlign: 'center', padding: 40, background: '#fff', borderRadius: 16 }}>
+              <span style={{ fontSize: 40 }}>📂</span>
+              <p style={{ color: '#6b7280', marginTop: 8 }}>No hay productos aún</p>
+            </div>
           )}
         </motion.div>
 
         {/* Órdenes recientes */}
         {stats.recentOrders?.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            style={{ background: '#fff', padding: 24, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+            style={{ background: '#fff', padding: 24, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginTop: 24 }}>
             <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Órdenes Recientes</h3>
             {stats.recentOrders.map(order => (
               <div key={order.id} onClick={() => navigate('/orders/' + order.id)}
