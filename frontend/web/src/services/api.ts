@@ -1,26 +1,45 @@
 ﻿import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const API_URL = 'http://localhost:3000/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' }
 });
 
-// Añadir token si existe
-if (typeof window !== 'undefined') {
-  const token = localStorage.getItem('buyer_token');
-  if (token) {
-    api.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-  }
-}
-
-export const register = (data: any) => api.post('/auth/register', data);
-export const login = (data: any) => api.post('/auth/login', data);
-export const getCategories = () => api.get('/categories');
-export const getProducts = (params?: any) => api.get('/products', { params });
-export const getProduct = (id: string) => api.get('/products/' + id);
-export const createOrder = (data: any) => api.post('/orders', data);
-export const getOrders = () => api.get('/orders');
-
 export default api;
+
+export const getCategories = async () => {
+  const res = await api.get('/categories');
+  return res;
+};
+
+export const getProducts = async (params?: any) => {
+  const res = await api.get('/products', { params });
+  return res;
+};
+
+export const getProduct = async (id: string) => {
+  const res = await api.get('/products/' + id);
+  return res;
+};
+
+export const loginBuyer = async (data: { email: string; password: string }) => {
+  const res = await api.post('/auth/login', data);
+  return res;
+};
+
+export const registerBuyer = async (data: any) => {
+  const res = await api.post('/auth/register', data);
+  return res;
+};
+
+export const createOrder = async (data: any) => {
+  const res = await api.post('/orders', data);
+  return res;
+};
+
+export const getOrders = async () => {
+  const res = await api.get('/orders');
+  return res;
+};
