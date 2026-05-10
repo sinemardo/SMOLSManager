@@ -38,14 +38,9 @@ export default function Catalog() {
     });
   }, []);
 
-  // 3. Cargar productos cuando cambia el filtro
-  useEffect(() => {
-    if (categories.length > 0) {
-      loadProducts();
-    }
-  }, [filter.category, filter.search]);
+  useEffect(() => { loadProducts(); }, [filter.category, filter.search]);
 
-  const loadProducts = async () => { if (categories.length === 0) return;
+  const loadProducts = async () => { 
     setLoading(true);
     try {
       const params = {};
@@ -161,3 +156,5 @@ export default function Catalog() {
     </Layout>
   );
 }
+
+
