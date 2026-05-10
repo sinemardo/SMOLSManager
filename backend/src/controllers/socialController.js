@@ -5,7 +5,6 @@ const { notifyUser } = require('../config/socket');
 exports.importPost = async (req, res, next) => {
   try {
     const { platform, postUrl, caption } = req.body;
-
     const socialPost = await prisma.socialPost.create({
       data: {
         userId: req.user.id,
@@ -18,14 +17,9 @@ exports.importPost = async (req, res, next) => {
         comments: Math.floor(Math.random() * 100)
       }
     });
-
-    notifyUser(req.user.id, 'post:imported', {
-      postId: socialPost.id,
-      platform: socialPost.platform
-    });
-
+    notifyUser(req.user.id, 'post:imported', { postId: socialPost.id, platform: socialPost.platform });
     logger.info('Post importado: ' + socialPost.id);
-    res.status(201).json({ message: 'Post importado exitosamente', post: socialPost });
+    res.status(201).json({ message: 'Post importado', post: socialPost });
   } catch (error) { next(error); }
 };
 
@@ -33,11 +27,8 @@ exports.convertToProduct = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const { name, price, categoryId } = req.body;
-
     const socialPost = await prisma.socialPost.findUnique({ where: { id: postId } });
-    if (!socialPost || socialPost.userId !== req.user.id) {
-      return res.status(404).json({ message: 'Post no encontrado' });
-    }
+    if (!socialPost || socialPost.userId !== req.user.id) return res.status(404).json({ message: 'Post no encontrado' });
 
     const product = await prisma.product.create({
       data: {
@@ -51,28 +42,25 @@ exports.convertToProduct = async (req, res, next) => {
         images: socialPost.mediaUrl ? [{ url: socialPost.mediaUrl, alt: name }] : []
       }
     });
-
-    await prisma.socialPost.update({
-      where: { id: postId },
-      data: { isConverted: true, convertedProductId: product.id }
-    });
-
-    notifyUser(req.user.id, 'post:converted', {
-      productId: product.id,
-      name: product.name
-    });
-
-    logger.info('Post convertido a producto: ' + product.id);
-    res.status(201).json({ message: 'Producto creado desde post', product });
+    await prisma.socialPost.update({ where: { id: postId }, data: { isConverted: true, convertedProductId: product.id } });
+    notifyUser(req.user.id, 'post:converted', { productId: product.id, name: product.name });
+    logger.info('Post convertido: ' + product.id);
+    res.status(201).json({ message: 'Producto creado', product });
   } catch (error) { next(error); }
 };
 
 exports.getMyPosts = async (req, res, next) => {
   try {
-    const posts = await prisma.socialPost.findMany({
-      where: { userId: req.user.id },
-      orderBy: { createdAt: 'desc' }
-    });
+    const posts = await prisma.socialPost.findMany({ where: { userId: req.user.id }, orderBy: { createdAt: 'desc' } });
     res.json({ posts });
+  } catch (error) { next(error); }
+};
+
+exports.deletePost = async (req, res, next) => {
+  try {
+    const post = await prisma.socialPost.findUnique({ where: { id: req.params.postId } });
+    if (!post || post.userId !== req.user.id) return res.status(404).json({ message: 'Post no encontrado' });
+    await prisma.socialPost.delete({ where: { id: req.params.postId } });
+    res.json({ message: 'Post eliminado' });
   } catch (error) { next(error); }
 };

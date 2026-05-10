@@ -6,6 +6,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const ImportPost = lazy(() => import('./pages/ImportPost'));
+const PostsManager = lazy(() => import('./pages/PostsManager'));
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -22,6 +23,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/import" element={<PrivateRoute><ImportPost /></PrivateRoute>} />
+            <Route path="/posts" element={<PrivateRoute><PostsManager /></PrivateRoute>} />
             <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
