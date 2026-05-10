@@ -1,17 +1,41 @@
 ﻿===========================================
 SMOLSManager - CREDENCIALES
 ===========================================
-Proyecto: SMOLSManager (Social Media OnLine Shop Management)
-Dominio: smolsmanager.com
-Repositorio: https://github.com/sinemardo/SMOLSManager
-Base de datos: PostgreSQL (Neon)
 
-DATABASE_URL: 
+PROYECTO
+  Nombre: SMOLSManager (Social Media OnLine Shop Management)
+  Dominio: smolsmanager.com
+  Repositorio: https://github.com/sinemardo/SMOLSManager
+
+BASE DE DATOS
+  Tipo: PostgreSQL (Neon)
+  Proyecto: wild-snow-13905032
+  Dashboard: https://console.neon.tech/app/projects/wild-snow-13905032
+
+ACCESOS
+  Admin Email: admin@smolsmanager.com
+  Admin Password: admin123
+
+USUARIO REGISTRADO (PWA)
+  Email: sinemardo@gmail.com
+  (Contraseña: la que configuraste)
+
+URLS LOCALES
+  Backend API: http://localhost:3000
+  API Docs: http://localhost:3000/api-docs
+  Health: http://localhost:3000/api/v1/health
+  PWA Admin: http://localhost:5173
+  PWA Login: http://localhost:5173/login
+  PWA Import: http://localhost:5173/import
+  Web Pública: http://localhost:3001
+
+COMANDOS ÚTILES
+  Iniciar backend: cd backend && npm run dev
+  Iniciar PWA: cd admin-pwa && npm run dev
+  Iniciar Web: cd web && npm run dev
+  Prisma Studio: cd backend && npx prisma studio
+  Seed categorías: cd backend && node prisma/seed.js
 
 ===========================================
-Comandos útiles:
-  npm run dev          -> Iniciar servidor
-  npm run db:studio    -> Ver datos en Prisma Studio
-  npm run db:seed      -> Sembrar categorías
+Fecha: 2026-05-10
 ===========================================
-Fecha: 2026-05-10 13:52

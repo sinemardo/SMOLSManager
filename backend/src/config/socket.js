@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
-const logger = require('./config/logger');
+const logger = require('./logger');
+const prisma = require('../utils/prisma');
 
 let io = null;
 
@@ -12,7 +13,6 @@ function initSocket(server) {
     }
   });
 
-  // Middleware de autenticaci?n
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('Token requerido'));
@@ -23,7 +23,7 @@ function initSocket(server) {
       socket.join('user:' + decoded.userId);
       next();
     } catch (err) {
-      next(new Error('Token inv?lido'));
+      next(new Error('Token invalido'));
     }
   });
 
@@ -44,17 +44,10 @@ function getIO() {
   return io;
 }
 
-// Enviar notificaci?n a un usuario espec?fico
 function notifyUser(userId, event, data) {
   if (!io) return;
   io.to('user:' + userId).emit(event, data);
-  logger.info('Notificacion enviada a ' + userId + ': ' + event);
+  logger.info('Notificacion a ' + userId + ': ' + event);
 }
 
-// Enviar notificaci?n a todos los admins
-function notifyAdmins(event, data) {
-  if (!io) return;
-  io.to('role:admin').emit(event, data);
-}
-
-module.exports = { initSocket, getIO, notifyUser, notifyAdmins };
+module.exports = { initSocket, getIO, notifyUser };
