@@ -4,8 +4,10 @@ import Login from './pages/Login';
 import ImportPost from './pages/ImportPost';
 import PostsManager from './pages/PostsManager';
 import Catalog from './pages/Catalog';
+import ProductDetail from './pages/ProductDetail';
 import StoreProfile from './pages/StoreProfile';
 import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
 import Analytics from './pages/Analytics';
 import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
@@ -31,7 +33,9 @@ function App() {
         <Route path="/import" element={<ImportPost />} />
         <Route path="/posts" element={<PostsManager />} />
         <Route path="/catalog" element={<Catalog />} />
+        <Route path="/catalog/:id" element={<ProductDetail />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:id" element={<OrderDetail />} />
         <Route path="/profile" element={<StoreProfile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/" element={<Dashboard />} />
