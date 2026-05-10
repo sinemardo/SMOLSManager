@@ -14,6 +14,8 @@ export default function App() {
   const [authMsg, setAuthMsg] = useState('');
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
+  const cartTotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
@@ -181,4 +183,6 @@ export default function App() {
     </div>
   );
 }
+
+
 
