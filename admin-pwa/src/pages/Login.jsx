@@ -1,8 +1,8 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 
-export default function Login({ onLogin }) {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -10,29 +10,25 @@ export default function Login({ onLogin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/auth/login', { email, password });
-      localStorage.setItem('smols_token', data.accessToken);
-      localStorage.setItem('smols_user', JSON.stringify(data.user));
-      onLogin();
+      const res = await api.post('/auth/login', { email, password });
+      localStorage.setItem('smols_token', res.data.accessToken);
+      localStorage.setItem('smols_user', JSON.stringify(res.data.user));
+      window.location.href = '/';
     } catch (err) {
       setError('Error al iniciar sesion');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-indigo-600 mb-2">SMOLSManager</h1>
-        <p className="text-center text-gray-500 mb-6">Social Media OnLine Shop Management</p>
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-2 border rounded-lg" placeholder="tu@email.com" required />
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-2 border rounded-lg" placeholder="Contrasena" required />
-          <button type="submit" className="w-full py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">Iniciar Sesion</button>
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(135deg,#4f46e5,#7c3aed)'}}>
+      <div style={{background:'#fff',padding:32,borderRadius:16,width:'100%',maxWidth:400}}>
+        <h1 style={{fontSize:28,fontWeight:700,color:'#4f46e5',textAlign:'center'}}>SMOLSManager</h1>
+        {error && <div style={{background:'#fef2f2',color:'#dc2626',padding:12,borderRadius:8,marginTop:16}}>{error}</div>}
+        <form onSubmit={handleSubmit} style={{marginTop:24}}>
+          <input type='email' value={email} onChange={e => setEmail(e.target.value)} style={{width:'100%',padding:12,border:'1px solid #d1d5db',borderRadius:8,marginBottom:12}} placeholder='Email' required />
+          <input type='password' value={password} onChange={e => setPassword(e.target.value)} style={{width:'100%',padding:12,border:'1px solid #d1d5db',borderRadius:8,marginBottom:16}} placeholder='Contrasena' required />
+          <button type='submit' style={{width:'100%',padding:12,background:'#4f46e5',color:'#fff',border:'none',borderRadius:8,fontSize:16,cursor:'pointer'}}>Iniciar Sesion</button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-4">
-          <Link to="/register" className="text-indigo-600 hover:underline">Registrate</Link>
-        </p>
       </div>
     </div>
   );
