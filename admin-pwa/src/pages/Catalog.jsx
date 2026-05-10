@@ -30,7 +30,11 @@ export default function Catalog() {
           c.displayName.toLowerCase() === catFromUrl.toLowerCase()
         );
         if (found) {
-          setFilter(prev => ({ ...prev, category: found.id }));
+          setFilter({ category: found.id, search: '' });
+          // Cargar productos inmediatamente con esta categoría
+          loadProductsWithCategory(found.id);
+          setLoading(false);
+          return;
         }
       }
       setLoading(false);
@@ -163,3 +167,5 @@ export default function Catalog() {
     </Layout>
   );
 }
+
+
