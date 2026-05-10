@@ -1,0 +1,129 @@
+﻿// SMOLSManager - Prisma Schema para Neon (PostgreSQL)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String
+  storeName     String?
+  role          String         @default("user")
+  isActive      Boolean        @default(true)
+  categoryId    String?
+  category      Category?      @relation(fields: [categoryId], references: [id])
+  refreshTokens RefreshToken[]
+  products      Product[]      @relation("SellerProducts")
+  orders        Order[]        @relation("BuyerOrders")
+  events        Event[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  displayName String
+  description String?
+  icon        String    @default("default-icon")
+  isActive    Boolean   @default(true)
+  users       User[]
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name])
+  @@map("categories")
+}
+
+model Product {
+  id             String     @id @default(uuid())
+  name           String
+  description    String?
+  price          Float
+  stock          Int        @default(1)
+  postUrl        String?
+  socialPlatform String     @default("other")
+  isActive       Boolean    @default(true)
+  views          Int        @default(0)
+  tags           String[]
+  images         Json       @default("[]")
+  sellerId       String
+  seller         User       @relation("SellerProducts", fields: [sellerId], references: [id])
+  categoryId     String
+  category       Category   @relation(fields: [categoryId], references: [id])
+  orderItems     OrderItem[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([sellerId, categoryId])
+  @@index([isActive])
+  @@map("products")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  buyerId         String
+  buyer           User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId        String
+  totalAmount     Float
+  status          String      @default("pending")
+  shippingAddress Json        @default("{}")
+  notes           String?
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([buyerId])
+  @@index([sellerId, status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+
+  @@map("order_items")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  type      String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  data      Json     @default("{}")
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([userId, createdAt])
+  @@map("events")
+}

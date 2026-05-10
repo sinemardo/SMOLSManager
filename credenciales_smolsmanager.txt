@@ -1,0 +1,17 @@
+﻿===========================================
+SMOLSManager - CREDENCIALES
+===========================================
+Proyecto: SMOLSManager (Social Media OnLine Shop Management)
+Dominio: smolsmanager.com
+Repositorio: https://github.com/sinemardo/SMOLSManager
+Base de datos: PostgreSQL (Neon)
+
+DATABASE_URL: 
+
+===========================================
+Comandos útiles:
+  npm run dev          -> Iniciar servidor
+  npm run db:studio    -> Ver datos en Prisma Studio
+  npm run db:seed      -> Sembrar categorías
+===========================================
+Fecha: 2026-05-10 13:52
