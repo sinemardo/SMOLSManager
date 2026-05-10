@@ -1,38 +1,33 @@
-﻿const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const categories = [
-  { name: 'electronics', displayName: 'Electrónica', description: 'Dispositivos y gadgets electrónicos' },
-  { name: 'bakery', displayName: 'Repostería', description: 'Pasteles, panes y postres artesanales' },
-  { name: 'mechanic', displayName: 'Mecánica', description: 'Servicios y productos mecánicos' },
-  { name: 'computation', displayName: 'Computación', description: 'Software, hardware y servicios IT' },
-  { name: 'fashion', displayName: 'Moda', description: 'Ropa, accesorios y calzado' },
-  { name: 'home', displayName: 'Hogar', description: 'Decoración y artículos para el hogar' },
-  { name: 'sports', displayName: 'Deportes', description: 'Equipamiento y ropa deportiva' },
-  { name: 'beauty', displayName: 'Belleza', description: 'Cosméticos y cuidado personal' },
-  { name: 'food', displayName: 'Alimentación', description: 'Comida y productos gourmet' },
-  { name: 'crafts', displayName: 'Artesanías', description: 'Productos hechos a mano' }
-];
-
 async function main() {
-  console.log('🌱 Iniciando seed de categorías...');
+  console.log('Creando categorias...');
   
-  for (const category of categories) {
+  const cats = [
+    { name: 'electronics', displayName: 'Electronica' },
+    { name: 'bakery', displayName: 'Reposteria' },
+    { name: 'mechanic', displayName: 'Mecanica' },
+    { name: 'computation', displayName: 'Computacion' },
+    { name: 'fashion', displayName: 'Moda' },
+    { name: 'home', displayName: 'Hogar' },
+    { name: 'sports', displayName: 'Deportes' },
+    { name: 'beauty', displayName: 'Belleza' },
+    { name: 'food', displayName: 'Alimentacion' },
+    { name: 'crafts', displayName: 'Artesanias' }
+  ];
+
+  for (const cat of cats) {
     await prisma.category.upsert({
-      where: { name: category.name },
+      where: { name: cat.name },
       update: {},
-      create: category
+      create: cat
     });
   }
   
-  console.log('✅ Categorías creadas exitosamente');
+  console.log('Categorias creadas exitosamente');
 }
 
 main()
-  .catch((e) => {
-    console.error('Error en seed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.\();
-  });
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

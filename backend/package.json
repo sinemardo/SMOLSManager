@@ -1,21 +1,14 @@
-﻿{
+{
   "name": "smolsmanager-backend",
   "version": "1.0.0",
-  "description": "Backend API for SMOLSManager - PostgreSQL + Prisma + Neon",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "db:migrate": "npx prisma migrate dev",
-    "db:seed": "node prisma/seed.js",
-    "db:studio": "npx prisma studio",
     "db:generate": "npx prisma generate",
     "db:push": "npx prisma db push",
-    "test": "jest --coverage"
+    "db:seed": "node prisma/seed.js"
   },
-  "keywords": ["smolsmanager", "prisma", "postgresql", "neon"],
-  "author": "GregoryFranco",
-  "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.7.0",
     "bcryptjs": "^2.4.3",
