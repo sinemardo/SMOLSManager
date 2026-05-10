@@ -2,6 +2,7 @@
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import ImportPost from './pages/ImportPost';
+import CreateProduct from './pages/CreateProduct';
 import PostsManager from './pages/PostsManager';
 import Catalog from './pages/Catalog';
 import ProductDetail from './pages/ProductDetail';
@@ -31,6 +32,7 @@ function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/import" element={<ImportPost />} />
+        <Route path="/create" element={<CreateProduct />} />
         <Route path="/posts" element={<PostsManager />} />
         <Route path="/catalog" element={<Catalog />} />
         <Route path="/catalog/:id" element={<ProductDetail />} />

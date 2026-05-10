@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 export default function Layout({ children, user }) {
   const [currentPath, setCurrentPath] = useState('/');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
 
   useEffect(() => {
     setCurrentPath(window.location.pathname);
@@ -21,6 +20,7 @@ export default function Layout({ children, user }) {
     { href: '/catalog', label: 'Catalogo', icon: '📦' },
     { href: '/orders', label: 'Ordenes', icon: '📋' },
     { href: '/import', label: 'Importar', icon: '📥' },
+    { href: '/create', label: 'Crear', icon: '➕' },
     { href: '/posts', label: 'Posts', icon: '📝' },
     { href: '/profile', label: 'Tienda', icon: '🏪' },
     { href: '/settings', label: 'Config', icon: '⚙️' }
@@ -28,10 +28,8 @@ export default function Layout({ children, user }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-      <motion.nav
-        initial={{ y: -60 }} animate={{ y: 0 }}
-        style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, padding: '0 16px' }}
-      >
+      <motion.nav initial={{ y: -60 }} animate={{ y: 0 }}
+        style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, padding: '0 16px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 56 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginRight: 12 }}>
@@ -47,18 +45,15 @@ export default function Layout({ children, user }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <a href="/notifications" style={{ position: 'relative', textDecoration: 'none', fontSize: 20, padding: 8 }}>
-              🔔
-              {unreadCount > 0 && (
-                <span style={{ position: 'absolute', top: 2, right: 2, background: '#dc2626', color: '#fff', fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{unreadCount}</span>
-              )}
-            </a>
+            <a href="/notifications" style={{ position: 'relative', textDecoration: 'none', fontSize: 20, padding: 8 }}>🔔</a>
             <a href="/settings" style={{ textDecoration: 'none', fontSize: 18, padding: 8 }}>⚙️</a>
-            <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: '#374151' }}>
+            <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', fontSize: 14, cursor: 'pointer', color: '#374151' }}>
               {user?.name?.split(' ')[0]} ▾
             </button>
             {menuOpen && (
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ position: 'absolute', top: 56, right: 16, background: '#fff', borderRadius: 12, boxShadow: '0 10px 40px rgba(0,0,0,0.15)', padding: 8, minWidth: 180, zIndex: 200 }} onClick={() => setMenuOpen(false)}>
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                style={{ position: 'absolute', top: 56, right: 16, background: '#fff', borderRadius: 12, boxShadow: '0 10px 40px rgba(0,0,0,0.15)', padding: 8, minWidth: 180, zIndex: 200 }}
+                onClick={() => setMenuOpen(false)}>
                 {navItems.map(item => (
                   <a key={item.href} href={item.href} style={{ display: 'block', padding: '10px 16px', borderRadius: 8, textDecoration: 'none', fontSize: 14, color: currentPath === item.href ? '#4f46e5' : '#374151', background: currentPath === item.href ? '#eef2ff' : 'transparent' }}>
                     {item.icon} {item.label}
