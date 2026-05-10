@@ -65,7 +65,7 @@ export default function Dashboard() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 + (i * 0.05) }}
-                  onClick={() => navigate('/catalog?category=' + cat.name)}
+                  onClick={() => navigate('/catalog?category=' + cat.name + '&id=' + cat.name)}
                   style={{
                     background: '#fff',
                     padding: 20,
