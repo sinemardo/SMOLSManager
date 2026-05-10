@@ -107,7 +107,7 @@ export default function Catalog() {
             {categories.map(c => <option key={c.id} value={c.id}>{c.displayName} ({c._count?.products || 0})</option>)}
           </select>
           {filter.category && (
-            <button onClick={() => { setFilter({ ...filter, category: '' }); window.history.pushState({}, '', '/catalog'); }}
+            <button onClick={() => { window.location.href = '/catalog'; }}
               style={{ padding: '8px 16px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>✕ Limpiar</button>
           )}
         </div>
