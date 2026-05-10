@@ -21,6 +21,7 @@ model User {
   products      Product[]      @relation("SellerProducts")
   orders        Order[]        @relation("BuyerOrders")
   events        Event[]
+  socialPosts   SocialPost[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -123,4 +124,25 @@ model Event {
   @@index([type, createdAt])
   @@index([userId, createdAt])
   @@map("events")
+}
+
+model SocialPost {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  platform       String   @default("instagram")
+  postId         String   @unique
+  caption        String?
+  mediaUrl       String?
+  permalink      String?
+  likes          Int      @default(0)
+  comments       Int      @default(0)
+  importedAt     DateTime @default(now())
+  isConverted    Boolean  @default(false)
+  convertedProductId String?
+  createdAt      DateTime @default(now())
+
+  @@index([userId, platform])
+  @@index([platform, postId])
+  @@map("social_posts")
 }
