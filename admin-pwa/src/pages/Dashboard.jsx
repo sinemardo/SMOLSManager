@@ -1,27 +1,34 @@
 ﻿import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useNotifications } from '../hooks/useNotifications';
 import api from '../services/api';
 
-const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#22c55e', '#14b8a6'];
+const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'];
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
-  const [funnel, setFunnel] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const token = localStorage.getItem('smols_token');
+
+  useNotifications(user?.id, token);
 
   useEffect(() => {
     loadData();
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
 
   const loadData = async () => {
     try {
-      const [dashRes, funnelRes] = await Promise.all([
-        api.get('/kpis/dashboard'),
-        api.get('/kpis/funnel')
+      const [dashRes] = await Promise.all([
+        api.get('/kpis/dashboard')
       ]);
       setStats(dashRes.data.kpis);
-      setFunnel(funnelRes.data.funnel);
     } catch (err) {
       console.error('Error cargando datos:', err);
     }
@@ -35,6 +42,9 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 className="text-xl font-bold text-indigo-600">SMOLSManager</h1>
           <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/import')} className="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full hover:bg-indigo-200">
+              Importar Post
+            </button>
             <span className="text-sm text-gray-600">{user?.name}</span>
             <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">{user?.role}</span>
             <button onClick={logout} className="text-sm text-red-500 hover:text-red-700">Salir</button>
@@ -51,7 +61,7 @@ export default function Dashboard() {
             <p className="text-2xl font-bold">{stats.totalProducts}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-gray-500">Órdenes Hoy</p>
+            <p className="text-sm text-gray-500">Ordenes Hoy</p>
             <p className="text-2xl font-bold">{stats.ordersToday}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
@@ -66,11 +76,11 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold mb-4">Productos por Categoría</h3>
+            <h3 className="text-lg font-semibold mb-4">Productos por Categoria</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={stats.productsByCategory} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
-                  {stats.productsByCategory?.map((entry, index) => (
+                  {stats.productsByCategory?.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -80,21 +90,22 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold mb-4">Embudo de Ventas</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={funnel}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="stage" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <h3 className="text-lg font-semibold mb-4">Notificaciones</h3>
+            <div className="space-y-2">
+              {notifications.length === 0 && (
+                <p className="text-gray-400 text-sm">No hay notificaciones nuevas</p>
+              )}
+              {notifications.map((n, i) => (
+                <div key={i} className="p-3 bg-indigo-50 rounded-lg text-sm">
+                  {n.message}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Órdenes Recientes</h3>
+          <h3 className="text-lg font-semibold mb-4">Ordenes Recientes</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

@@ -1,12 +1,11 @@
 const prisma = require('../utils/prisma');
 const logger = require('../config/logger');
+const { notifyUser } = require('../config/socket');
 
-// Simular importaci?n desde Instagram/TikTok
 exports.importPost = async (req, res, next) => {
   try {
     const { platform, postUrl, caption } = req.body;
 
-    // Simulaci?n de datos del post
     const socialPost = await prisma.socialPost.create({
       data: {
         userId: req.user.id,
@@ -20,13 +19,9 @@ exports.importPost = async (req, res, next) => {
       }
     });
 
-    await prisma.event.create({
-      data: {
-        type: 'social:post_imported',
-        userId: req.user.id,
-        data: { postId: socialPost.id, platform },
-        metadata: { source: 'pwa' }
-      }
+    notifyUser(req.user.id, 'post:imported', {
+      postId: socialPost.id,
+      platform: socialPost.platform
     });
 
     logger.info('Post importado: ' + socialPost.id);
@@ -34,7 +29,6 @@ exports.importPost = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// Convertir post en producto
 exports.convertToProduct = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -47,7 +41,7 @@ exports.convertToProduct = async (req, res, next) => {
 
     const product = await prisma.product.create({
       data: {
-        name: name || socialPost.caption?.substring(0, 100) || 'Producto importado',
+        name: name || 'Producto importado',
         description: socialPost.caption,
         price: parseFloat(price) || 0,
         sellerId: req.user.id,
@@ -63,13 +57,9 @@ exports.convertToProduct = async (req, res, next) => {
       data: { isConverted: true, convertedProductId: product.id }
     });
 
-    await prisma.event.create({
-      data: {
-        type: 'product:created_from_social',
-        userId: req.user.id,
-        data: { productId: product.id, postId: socialPost.id },
-        metadata: { source: 'pwa' }
-      }
+    notifyUser(req.user.id, 'post:converted', {
+      productId: product.id,
+      name: product.name
     });
 
     logger.info('Post convertido a producto: ' + product.id);
@@ -77,7 +67,6 @@ exports.convertToProduct = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// Obtener posts importados
 exports.getMyPosts = async (req, res, next) => {
   try {
     const posts = await prisma.socialPost.findMany({

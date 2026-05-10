@@ -1,6 +1,7 @@
 const prisma = require('../utils/prisma');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
+const { notifyUser } = require('../config/socket');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -27,7 +28,26 @@ exports.create = async (req, res, next) => {
     });
 
     const order = await prisma.order.create({
-      data: { buyerId: req.user.id, sellerId, totalAmount, shippingAddress: shippingAddress || {}, notes, items: { create: orderItems } }
+      data: { buyerId: req.user.id, sellerId, totalAmount, shippingAddress: shippingAddress || {}, notes, items: { create: orderItems } },
+      include: { items: { include: { product: true } }, buyer: { select: { name: true, email: true } } }
+    });
+
+    // Notificar al vendedor
+    notifyUser(sellerId, 'order:new', {
+      orderId: order.id,
+      total: totalAmount,
+      buyer: order.buyer.name,
+      products: order.items.length
+    });
+
+    // Registrar evento
+    await prisma.event.create({
+      data: {
+        type: 'order:created',
+        userId: req.user.id,
+        data: { orderId: order.id, totalAmount },
+        metadata: { source: 'pwa' }
+      }
     });
 
     logger.info('Orden creada: ' + order.id);
