@@ -3,9 +3,9 @@
 logs/
 *.log
 coverage/
+dist/
+.next/
+*.next/
+frontend/web/.next/
+admin-pwa/node_modules/.vite/
 .DS_Store
-.next/
-.next/
-frontend/web/.next/
-.next/
-frontend/web/.next/
