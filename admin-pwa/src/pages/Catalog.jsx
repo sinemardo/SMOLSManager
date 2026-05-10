@@ -1,14 +1,18 @@
 ﻿import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../components/layout/Layout';
 import api from '../services/api';
 
 export default function Catalog() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [filter, setFilter] = useState({ category: '', search: '', status: 'active' });
+  const [filter, setFilter] = useState({ 
+    category: searchParams.get('category') || '', 
+    search: searchParams.get('search') || '' 
+  });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const user = JSON.parse(localStorage.getItem('smols_user') || '{}');
@@ -16,7 +20,10 @@ export default function Catalog() {
   useEffect(() => {
     loadProducts();
     api.get('/categories').then(r => setCategories(r.data.categories));
-  }, [filter]);
+    // Actualizar filtro si cambia la URL
+    const cat = searchParams.get('category');
+    if (cat) setFilter(prev => ({ ...prev, category: cat }));
+  }, [searchParams]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -31,6 +38,22 @@ export default function Catalog() {
     } finally { setLoading(false); }
   };
 
+  // Recargar cuando cambia el filtro
+  useEffect(() => {
+    loadProducts();
+  }, [filter.category, filter.search]);
+
+  const handleCategoryChange = (e) => {
+    const catId = e.target.value;
+    setFilter({ ...filter, category: catId });
+    // Actualizar URL sin recargar
+    if (catId) {
+      navigate('/catalog?category=' + catId, { replace: true });
+    } else {
+      navigate('/catalog', { replace: true });
+    }
+  };
+
   const handleDelete = async (id, e) => {
     e.stopPropagation();
     if (!confirm('¿Desactivar este producto?')) return;
@@ -38,10 +61,11 @@ export default function Catalog() {
       await api.delete('/products/' + id);
       setProducts(products.filter(p => p.id !== id));
       setMessage('Producto desactivado');
-    } catch (err) {
-      setMessage('Error al desactivar');
-    }
+    } catch (err) { setMessage('Error al desactivar'); }
   };
+
+  // Encontrar el nombre de la categoría seleccionada
+  const selectedCategory = categories.find(c => c.id === filter.category);
 
   return (
     <Layout user={user}>
@@ -49,39 +73,67 @@ export default function Catalog() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 700 }}>📦 Catálogo de Productos</h2>
-            <p style={{ color: '#6b7280', fontSize: 14 }}>{products.length} productos</p>
+            <p style={{ color: '#6b7280', fontSize: 14 }}>
+              {products.length} productos
+              {selectedCategory && <span style={{ marginLeft: 8, background: '#eef2ff', color: '#4f46e5', padding: '2px 10px', borderRadius: 20, fontSize: 12 }}>{selectedCategory.displayName}</span>}
+            </p>
           </div>
           <a href="/import" style={{ padding: '10px 20px', background: '#4f46e5', color: '#fff', textDecoration: 'none', borderRadius: 10, fontWeight: 600, fontSize: 14 }}>
             + Nuevo Producto
           </a>
         </div>
 
-        <div className="card" style={{ marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <input type="text" placeholder="🔍 Buscar..." value={filter.search} onChange={e => setFilter({ ...filter, search: e.target.value })}
-            style={{ flex: 1, minWidth: 200, padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none' }} />
-          <select value={filter.category} onChange={e => setFilter({ ...filter, category: e.target.value })}
-            style={{ padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 150 }}>
+        {/* Filtros */}
+        <div style={{ background: '#fff', padding: 16, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="🔍 Buscar productos..."
+            value={filter.search}
+            onChange={e => setFilter({ ...filter, search: e.target.value })}
+            style={{ flex: 1, minWidth: 200, padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+            onFocus={e => e.target.style.borderColor = '#4f46e5'}
+            onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+          />
+          <select
+            value={filter.category}
+            onChange={handleCategoryChange}
+            style={{ padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 180, background: filter.category ? '#eef2ff' : '#fff', color: filter.category ? '#4f46e5' : '#374151', fontWeight: filter.category ? 600 : 400, cursor: 'pointer', boxSizing: 'border-box' }}
+          >
             <option value="">Todas las categorías</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.displayName}</option>)}
+            {categories.map(c => (
+              <option key={c.id} value={c.id}>{c.displayName}</option>
+            ))}
           </select>
+          {filter.category && (
+            <button
+              onClick={() => { setFilter({ ...filter, category: '' }); navigate('/catalog', { replace: true }); }}
+              style={{ padding: '8px 16px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
+            >
+              ✕ Limpiar filtro
+            </button>
+          )}
         </div>
 
         {message && <div style={{ padding: '12px 16px', borderRadius: 8, marginBottom: 16, background: '#ecfdf5', color: '#059669', fontSize: 14, cursor: 'pointer' }} onClick={() => setMessage('')}>{message}</div>}
 
+        {/* Grid */}
         {loading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-            {[1,2,3,4].map(i => <div key={i} className="card" style={{ height: 200 }}><div style={{ height: 120, background: '#e5e7eb', borderRadius: 8, animation: 'pulse 1.5s infinite' }} /></div>)}
+            {[1,2,3,4].map(i => <div key={i} style={{ background: '#fff', borderRadius: 16, height: 200 }}><div style={{ height: 120, background: '#e5e7eb', borderRadius: '16px 16px 0 0' }} /></div>)}
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
             <AnimatePresence>
               {products.map((product, i) => (
-                <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.05 }}
+                <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.03 }}
                   onClick={() => navigate('/catalog/' + product.id)}
-                  className="card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}>
+                  style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; }}
+                >
                   <div style={{ height: 140, background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                     <span style={{ fontSize: 48 }}>📦</span>
-                    <span className="badge" style={{ position: 'absolute', top: 10, right: 10, background: product.isActive ? '#ecfdf5' : '#fef2f2', color: product.isActive ? '#059669' : '#dc2626' }}>
+                    <span style={{ position: 'absolute', top: 10, right: 10, background: product.isActive ? '#ecfdf5' : '#fef2f2', color: product.isActive ? '#059669' : '#dc2626', padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500 }}>
                       {product.isActive ? 'Activo' : 'Inactivo'}
                     </span>
                   </div>
@@ -92,7 +144,7 @@ export default function Catalog() {
                     </p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: 18, fontWeight: 700, color: '#4f46e5' }}>€{product.price}</span>
-                      <span className="badge badge-primary">{product.category?.displayName || 'Sin categoría'}</span>
+                      <span style={{ background: '#eef2ff', color: '#4f46e5', padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500 }}>{product.category?.displayName || 'Sin categoría'}</span>
                     </div>
                     <button onClick={(e) => handleDelete(product.id, e)} style={{ marginTop: 12, width: '100%', padding: '8px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 12 }}>
                       🗑️ Desactivar
@@ -105,7 +157,8 @@ export default function Catalog() {
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 60 }}>
                 <span style={{ fontSize: 64 }}>📦</span>
                 <h3 style={{ fontSize: 20, fontWeight: 600, marginTop: 16 }}>No hay productos</h3>
-                <a href="/import" style={{ color: '#4f46e5', fontWeight: 600 }}>Importar ahora →</a>
+                <p style={{ color: '#6b7280', marginTop: 4 }}>{filter.category ? 'No hay productos en esta categoría' : 'Crea tu primer producto'}</p>
+                {filter.category && <button onClick={() => { setFilter({ ...filter, category: '' }); navigate('/catalog'); }} style={{ marginTop: 16, padding: '10px 20px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Ver todas las categorías</button>}
               </div>
             )}
           </div>
