@@ -1,4 +1,4 @@
-const prisma = require('../utils/prisma');
+﻿const prisma = require('../utils/prisma');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
 
@@ -6,7 +6,8 @@ exports.getAll = async (req, res, next) => {
   try {
     const categories = await prisma.category.findMany({
       where: { isActive: true },
-      orderBy: { displayName: 'asc' }
+      orderBy: { displayName: 'asc' },
+      include: { _count: { select: { products: true } } }
     });
     res.json({ categories });
   } catch (error) { next(error); }
@@ -30,18 +31,15 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    const category = await prisma.category.update({
-      where: { id: req.params.id },
-      data: req.body
-    });
+    const category = await prisma.category.update({ where: { id: req.params.id }, data: req.body });
     res.json({ message: 'Categoria actualizada', category });
   } catch (error) { next(error); }
 };
 
 exports.delete = async (req, res, next) => {
   try {
-    await prisma.category.delete({ where: { id: req.params.id } });
-    res.json({ message: 'Categoria eliminada' });
+    await prisma.category.update({ where: { id: req.params.id }, data: { isActive: false } });
+    res.json({ message: 'Categoria desactivada' });
   } catch (error) { next(error); }
 };
 

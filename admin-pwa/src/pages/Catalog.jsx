@@ -104,7 +104,7 @@ export default function Catalog() {
           <select value={filter.category} onChange={handleCategoryChange}
             style={{ padding: '10px 16px', border: '2px solid ' + (filter.category ? '#4f46e5' : '#e5e7eb'), borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 180, background: filter.category ? '#eef2ff' : '#fff', color: filter.category ? '#4f46e5' : '#374151', fontWeight: filter.category ? 600 : 400, cursor: 'pointer', boxSizing: 'border-box' }}>
             <option value="">Todas las categorías</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.displayName}</option>)}
+            {categories.map(c => <option key={c.id} value={c.id}>{c.displayName} ({c._count?.products || 0})</option>)}
           </select>
           {filter.category && (
             <button onClick={() => { setFilter({ ...filter, category: '' }); window.history.pushState({}, '', '/catalog'); }}
