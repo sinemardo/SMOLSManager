@@ -1,29 +1,33 @@
 ﻿import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../components/layout/Layout';
 import api from '../services/api';
 
 export default function Catalog() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  
+  // Leer categoria de la URL directamente
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialCategory = urlParams.get('category') || '';
+  
   const [filter, setFilter] = useState({ 
-    category: searchParams.get('category') || '', 
-    search: searchParams.get('search') || '' 
+    category: initialCategory, 
+    search: '' 
   });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const user = JSON.parse(localStorage.getItem('smols_user') || '{}');
 
   useEffect(() => {
-    loadProducts();
     api.get('/categories').then(r => setCategories(r.data.categories));
-    // Actualizar filtro si cambia la URL
-    const cat = searchParams.get('category');
-    if (cat) setFilter(prev => ({ ...prev, category: cat }));
-  }, [searchParams]);
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [filter.category, filter.search]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -34,23 +38,17 @@ export default function Catalog() {
       const res = await api.get('/products', { params });
       setProducts(res.data.products || []);
     } catch (err) {
-      setMessage('Error al cargar productos');
+      setMessage('Error');
     } finally { setLoading(false); }
   };
-
-  // Recargar cuando cambia el filtro
-  useEffect(() => {
-    loadProducts();
-  }, [filter.category, filter.search]);
 
   const handleCategoryChange = (e) => {
     const catId = e.target.value;
     setFilter({ ...filter, category: catId });
-    // Actualizar URL sin recargar
     if (catId) {
-      navigate('/catalog?category=' + catId, { replace: true });
+      window.history.pushState({}, '', '/catalog?category=' + catId);
     } else {
-      navigate('/catalog', { replace: true });
+      window.history.pushState({}, '', '/catalog');
     }
   };
 
@@ -64,7 +62,6 @@ export default function Catalog() {
     } catch (err) { setMessage('Error al desactivar'); }
   };
 
-  // Encontrar el nombre de la categoría seleccionada
   const selectedCategory = categories.find(c => c.id === filter.category);
 
   return (
@@ -83,43 +80,33 @@ export default function Catalog() {
           </a>
         </div>
 
-        {/* Filtros */}
         <div style={{ background: '#fff', padding: 16, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <input
-            type="text"
-            placeholder="🔍 Buscar productos..."
-            value={filter.search}
+            type="text" placeholder="🔍 Buscar..." value={filter.search}
             onChange={e => setFilter({ ...filter, search: e.target.value })}
             style={{ flex: 1, minWidth: 200, padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
-            onFocus={e => e.target.style.borderColor = '#4f46e5'}
-            onBlur={e => e.target.style.borderColor = '#e5e7eb'}
           />
           <select
             value={filter.category}
             onChange={handleCategoryChange}
-            style={{ padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 180, background: filter.category ? '#eef2ff' : '#fff', color: filter.category ? '#4f46e5' : '#374151', fontWeight: filter.category ? 600 : 400, cursor: 'pointer', boxSizing: 'border-box' }}
+            style={{ padding: '10px 16px', border: '2px solid #4f46e5', borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 180, background: filter.category ? '#eef2ff' : '#fff', color: filter.category ? '#4f46e5' : '#374151', fontWeight: 600, cursor: 'pointer', boxSizing: 'border-box' }}
           >
             <option value="">Todas las categorías</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.displayName}</option>
-            ))}
+            {categories.map(c => <option key={c.id} value={c.id}>{c.displayName}</option>)}
           </select>
           {filter.category && (
-            <button
-              onClick={() => { setFilter({ ...filter, category: '' }); navigate('/catalog', { replace: true }); }}
-              style={{ padding: '8px 16px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}
-            >
-              ✕ Limpiar filtro
+            <button onClick={() => { setFilter({ ...filter, category: '' }); window.history.pushState({}, '', '/catalog'); }}
+              style={{ padding: '8px 16px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>
+              ✕ Limpiar
             </button>
           )}
         </div>
 
         {message && <div style={{ padding: '12px 16px', borderRadius: 8, marginBottom: 16, background: '#ecfdf5', color: '#059669', fontSize: 14, cursor: 'pointer' }} onClick={() => setMessage('')}>{message}</div>}
 
-        {/* Grid */}
         {loading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-            {[1,2,3,4].map(i => <div key={i} style={{ background: '#fff', borderRadius: 16, height: 200 }}><div style={{ height: 120, background: '#e5e7eb', borderRadius: '16px 16px 0 0' }} /></div>)}
+            {[1,2,3,4].map(i => <div key={i} style={{ background: '#fff', borderRadius: 16, height: 200, animation: 'pulse 1.5s infinite' }} />)}
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
@@ -158,7 +145,6 @@ export default function Catalog() {
                 <span style={{ fontSize: 64 }}>📦</span>
                 <h3 style={{ fontSize: 20, fontWeight: 600, marginTop: 16 }}>No hay productos</h3>
                 <p style={{ color: '#6b7280', marginTop: 4 }}>{filter.category ? 'No hay productos en esta categoría' : 'Crea tu primer producto'}</p>
-                {filter.category && <button onClick={() => { setFilter({ ...filter, category: '' }); navigate('/catalog'); }} style={{ marginTop: 16, padding: '10px 20px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Ver todas las categorías</button>}
               </div>
             )}
           </div>
