@@ -8,23 +8,34 @@ export default function Catalog() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  
-  // Leer categoria de la URL directamente
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialCategory = urlParams.get('category') || '';
-  
-  const [filter, setFilter] = useState({ 
-    category: initialCategory, 
-    search: '' 
-  });
+  const [filter, setFilter] = useState({ category: '', search: '' });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const user = JSON.parse(localStorage.getItem('smols_user') || '{}');
 
+  // Cargar categorías y sincronizar con URL
   useEffect(() => {
-    api.get('/categories').then(r => setCategories(r.data.categories));
+    api.get('/categories').then(r => {
+      const cats = r.data.categories || [];
+      setCategories(cats);
+      
+      // Leer categoría de URL y encontrar su ID
+      const urlParams = new URLSearchParams(window.location.search);
+      const catFromUrl = urlParams.get('category');
+      if (catFromUrl && cats.length > 0) {
+        const found = cats.find(c => 
+          c.id === catFromUrl || 
+          c.name === catFromUrl || 
+          c.displayName === catFromUrl
+        );
+        if (found) {
+          setFilter(prev => ({ ...prev, category: found.id }));
+        }
+      }
+    });
   }, []);
 
+  // Cargar productos cuando cambia el filtro
   useEffect(() => {
     loadProducts();
   }, [filter.category, filter.search]);
@@ -46,7 +57,8 @@ export default function Catalog() {
     const catId = e.target.value;
     setFilter({ ...filter, category: catId });
     if (catId) {
-      window.history.pushState({}, '', '/catalog?category=' + catId);
+      const cat = categories.find(c => c.id === catId);
+      window.history.pushState({}, '', '/catalog?category=' + (cat?.name || catId));
     } else {
       window.history.pushState({}, '', '/catalog');
     }
@@ -81,24 +93,17 @@ export default function Catalog() {
         </div>
 
         <div style={{ background: '#fff', padding: 16, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            type="text" placeholder="🔍 Buscar..." value={filter.search}
+          <input type="text" placeholder="🔍 Buscar..." value={filter.search}
             onChange={e => setFilter({ ...filter, search: e.target.value })}
-            style={{ flex: 1, minWidth: 200, padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
-          />
-          <select
-            value={filter.category}
-            onChange={handleCategoryChange}
-            style={{ padding: '10px 16px', border: '2px solid #4f46e5', borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 180, background: filter.category ? '#eef2ff' : '#fff', color: filter.category ? '#4f46e5' : '#374151', fontWeight: 600, cursor: 'pointer', boxSizing: 'border-box' }}
-          >
+            style={{ flex: 1, minWidth: 200, padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+          <select value={filter.category} onChange={handleCategoryChange}
+            style={{ padding: '10px 16px', border: '2px solid ' + (filter.category ? '#4f46e5' : '#e5e7eb'), borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 180, background: filter.category ? '#eef2ff' : '#fff', color: filter.category ? '#4f46e5' : '#374151', fontWeight: filter.category ? 600 : 400, cursor: 'pointer', boxSizing: 'border-box' }}>
             <option value="">Todas las categorías</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.displayName}</option>)}
           </select>
           {filter.category && (
             <button onClick={() => { setFilter({ ...filter, category: '' }); window.history.pushState({}, '', '/catalog'); }}
-              style={{ padding: '8px 16px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>
-              ✕ Limpiar
-            </button>
+              style={{ padding: '8px 16px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>✕ Limpiar</button>
           )}
         </div>
 
@@ -133,9 +138,7 @@ export default function Catalog() {
                       <span style={{ fontSize: 18, fontWeight: 700, color: '#4f46e5' }}>€{product.price}</span>
                       <span style={{ background: '#eef2ff', color: '#4f46e5', padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500 }}>{product.category?.displayName || 'Sin categoría'}</span>
                     </div>
-                    <button onClick={(e) => handleDelete(product.id, e)} style={{ marginTop: 12, width: '100%', padding: '8px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 12 }}>
-                      🗑️ Desactivar
-                    </button>
+                    <button onClick={(e) => handleDelete(product.id, e)} style={{ marginTop: 12, width: '100%', padding: '8px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 12 }}>🗑️ Desactivar</button>
                   </div>
                 </motion.div>
               ))}
