@@ -1,0 +1,57 @@
+﻿name: Frontends CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'admin-pwa/**'
+      - 'web/**'
+
+jobs:
+  build-pwa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: admin-pwa/package-lock.json
+      
+      - name: Install and Build PWA
+        run: |
+          cd admin-pwa
+          npm ci
+          npm run build
+      
+      - name: Deploy to Vercel
+        run: echo "Deploying PWA..."
+        env:
+          VERCEL_TOKEN: $\{{ secrets.VERCEL_TOKEN }}
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+      
+      - name: Install and Build Web
+        run: |
+          cd web
+          npm ci
+          npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.smolsmanager.com/api/v1
+      
+      - name: Deploy to Vercel
+        run: echo "Deploying Web..."
+        env:
+          VERCEL_TOKEN: $\{{ secrets.VERCEL_TOKEN }}
