@@ -4,6 +4,7 @@ import { Suspense, lazy } from 'react';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -18,6 +19,7 @@ function App() {
         <Suspense fallback={<div className="flex h-screen items-center justify-center">Cargando...</div>}>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
