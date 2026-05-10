@@ -29,7 +29,7 @@ export default function Catalog() {
           c.name.toLowerCase() === catFromUrl.toLowerCase() ||
           c.displayName.toLowerCase() === catFromUrl.toLowerCase()
         );
-        if (found) {
+        if (found && !sessionStorage.getItem('catalog_loaded')) { sessionStorage.setItem('catalog_loaded', '1');
           setFilter(prev => ({ ...prev, category: found.id }));
         }
       }
@@ -41,8 +41,6 @@ export default function Catalog() {
   useEffect(() => {
     loadProducts();
   }, [filter.category, filter.search]);
-
-  const loadProductsWithCategory = async (catId) => { setLoading(true); try { const res = await api.get('/products', { params: { category: catId } }); setProducts(res.data.products || []); } catch (err) { setMessage('Error'); } finally { setLoading(false); } };
 
   const loadProducts = async () => {
     setLoading(true);
@@ -165,4 +163,3 @@ export default function Catalog() {
     </Layout>
   );
 }
-
