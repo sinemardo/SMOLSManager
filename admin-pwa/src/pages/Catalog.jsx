@@ -13,13 +13,12 @@ export default function Catalog() {
   const [message, setMessage] = useState('');
   const user = JSON.parse(localStorage.getItem('smols_user') || '{}');
 
-  // 1. Cargar categorías primero
+  // Cargar categorías y sincronizar con URL
   useEffect(() => {
     api.get('/categories').then(r => {
       const cats = r.data.categories || [];
       setCategories(cats);
       
-      // 2. Después de tener categorías, leer URL y establecer filtro
       const urlParams = new URLSearchParams(window.location.search);
       const catFromUrl = urlParams.get('category');
       if (catFromUrl && cats.length > 0) {
@@ -31,16 +30,19 @@ export default function Catalog() {
           c.displayName.toLowerCase() === catFromUrl.toLowerCase()
         );
         if (found) {
-          console.log('Categoría encontrada en URL:', found.displayName, found.id);
           setFilter(prev => ({ ...prev, category: found.id }));
         }
       }
+      setLoading(false);
     });
   }, []);
 
-  useEffect(() => { loadProducts(); }, [filter.category, filter.search]);
+  // Cargar productos cuando cambia el filtro o al iniciar
+  useEffect(() => {
+    loadProducts();
+  }, [filter.category, filter.search]);
 
-  const loadProducts = async () => { 
+  const loadProducts = async () => {
     setLoading(true);
     try {
       const params = {};
@@ -64,9 +66,14 @@ export default function Catalog() {
     }
   };
 
+  const handleClearFilter = () => {
+    setFilter({ ...filter, category: '' });
+    window.history.pushState({}, '', '/catalog');
+  };
+
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if (!confirm('¿Desactivar este producto?')) return;
+    if (!confirm('Desactivar este producto?')) return;
     try {
       await api.delete('/products/' + id);
       setProducts(products.filter(p => p.id !== id));
@@ -97,12 +104,12 @@ export default function Catalog() {
             onChange={e => setFilter({ ...filter, search: e.target.value })}
             style={{ flex: 1, minWidth: 200, padding: '10px 16px', border: '2px solid #e5e7eb', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
           <select value={filter.category} onChange={handleCategoryChange}
-            style={{ padding: '10px 16px', border: '2px solid #4f46e5', borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 180, background: '#eef2ff', color: '#4f46e5', fontWeight: 600, cursor: 'pointer', boxSizing: 'border-box' }}>
+            style={{ padding: '10px 16px', border: '2px solid #4f46e5', borderRadius: 10, fontSize: 14, outline: 'none', minWidth: 200, background: '#eef2ff', color: '#4f46e5', fontWeight: 600, cursor: 'pointer', boxSizing: 'border-box' }}>
             <option value="">Todas las categorías</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.displayName} ({c._count?.products || 0})</option>)}
           </select>
           {filter.category && (
-            <button onClick={() => { window.location.href = '/catalog'; }}
+            <button onClick={handleClearFilter}
               style={{ padding: '8px 16px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>✕ Limpiar</button>
           )}
         </div>
@@ -111,7 +118,7 @@ export default function Catalog() {
 
         {loading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-            {[1,2,3,4].map(i => <div key={i} style={{ background: '#fff', borderRadius: 16, height: 200, animation: 'pulse 1.5s infinite' }} />)}
+            {[1,2,3,4].map(i => <div key={i} style={{ background: '#fff', borderRadius: 16, height: 200 }} />)}
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
@@ -156,5 +163,3 @@ export default function Catalog() {
     </Layout>
   );
 }
-
-
