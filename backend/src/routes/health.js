@@ -1,6 +1,7 @@
 ﻿const router = require('express').Router();
 const prisma = require('../utils/prisma');
 const os = require('os');
+const cache = require('../services/cacheService');
 
 router.get('/', async (req, res) => {
   let dbStatus = 'disconnected';
@@ -30,20 +31,23 @@ router.get('/', async (req, res) => {
         used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + 'MB',
         total: Math.round(os.totalmem() / 1024 / 1024) + 'MB'
       },
-      cpu: os.cpus().length + ' cores',
-      platform: os.platform()
-    }
+      cpu: os.cpus().length + ' cores'
+    },
+    cache: cache.getStats()
   });
 });
 
-// Endpoint de métricas simple
 router.get('/metrics', (req, res) => {
   res.json({
     uptime: process.uptime(),
     memory: process.memoryUsage(),
-    cpu: process.cpuUsage(),
-    node: process.version
+    cache: cache.getStats()
   });
+});
+
+router.post('/cache/clear', (req, res) => {
+  cache.clear();
+  res.json({ message: 'Cache limpiada' });
 });
 
 module.exports = router;
