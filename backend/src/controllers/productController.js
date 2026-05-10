@@ -8,18 +8,21 @@ exports.getAll = async (req, res, next) => {
     const where = { isActive: true };
 
     if (category) {
-      // Buscar la categoría por nombre o ID
-      const cat = await prisma.category.findFirst({
-        where: {
-          OR: [
-            { id: category },
-            { name: category },
-            { displayName: category }
-          ]
-        }
-      });
-      if (cat) {
-        where.categoryId = cat.id;
+      // Buscar categoría ignorando mayúsculas/minúsculas y tildes
+      const allCats = await prisma.category.findMany();
+      const found = allCats.find(c => 
+        c.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 
+        category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ||
+        c.displayName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 
+        category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ||
+        c.id === category
+      );
+      
+      if (found) {
+        where.categoryId = found.id;
+      } else {
+        // Si no encuentra, devolver vacío
+        return res.json({ products: [], pagination: { page: 1, limit: 50, total: 0, pages: 0 } });
       }
     }
     
