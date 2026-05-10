@@ -45,7 +45,7 @@ export default function Catalog() {
     }
   }, [filter.category, filter.search]);
 
-  const loadProducts = async () => {
+  const loadProducts = async () => { if (categories.length === 0) return;
     setLoading(true);
     try {
       const params = {};
