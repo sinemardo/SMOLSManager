@@ -12,6 +12,8 @@ export default function App() {
   const [authMode, setAuthMode] = useState('register');
   const [authForm, setAuthForm] = useState({ email: '', password: '', name: '', storeName: '' });
   const [authMsg, setAuthMsg] = useState('');
+  const [cart, setCart] = useState([]);
+  const [showCart, setShowCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
@@ -63,6 +65,10 @@ export default function App() {
             <>
               <span style={{ fontSize: 14 }}>{user.name}</span>
               <button onClick={logout} style={{ padding: '8px 16px', border: '1px solid #e2e8f0', borderRadius: 8, background: 'none', cursor: 'pointer', fontSize: 13 }}>Salir</button>
+              <button onClick={() => setShowCart(true)} style={{ position: 'relative', background: 'none', border: 'none', fontSize: 22, cursor: 'pointer' }}>
+                🛒
+                {cartCount > 0 && <span style={{ position: 'absolute', top: -5, right: -5, background: '#dc2626', color: '#fff', fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{cartCount}</span>}
+              </button>
             </>
           ) : (
             <>
@@ -165,7 +171,7 @@ export default function App() {
                 <p style={{ color: '#64748b', fontSize: 13, marginBottom: 12 }}>{p.description?.substring(0, 80)}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 22, fontWeight: 700, color: '#6366f1' }}>€{p.price}</span>
-                  <span style={{ fontSize: 11, color: '#94a3b8' }}>{p.seller?.storeName}</span>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>{p.seller?.storeName}</span>`n                <button onClick={(e) => addToCart(p, e)} style={{ width: "100%", marginTop: 10, padding: "8px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>🛒 Agregar al carrito</button>
                 </div>
               </div>
             </div>
@@ -175,3 +181,4 @@ export default function App() {
     </div>
   );
 }
+
