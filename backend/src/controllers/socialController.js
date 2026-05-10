@@ -1,17 +1,17 @@
-const prisma = require('../utils/prisma');
+﻿const prisma = require('../utils/prisma');
 const logger = require('../config/logger');
 const { notifyUser } = require('../config/socket');
 
 exports.importPost = async (req, res, next) => {
   try {
-    const { platform, postUrl, caption } = req.body;
+    const { platform, postUrl, caption, images } = req.body;
     const socialPost = await prisma.socialPost.create({
       data: {
         userId: req.user.id,
         platform: platform || 'instagram',
         postId: 'sim_' + Date.now(),
         caption: caption || 'Producto desde ' + platform,
-        mediaUrl: 'https://picsum.photos/400/400',
+        mediaUrl: images?.[0]?.url || 'https://picsum.photos/400/400',
         permalink: postUrl || 'https://instagram.com/p/simulado',
         likes: Math.floor(Math.random() * 1000),
         comments: Math.floor(Math.random() * 100)
@@ -26,9 +26,14 @@ exports.importPost = async (req, res, next) => {
 exports.convertToProduct = async (req, res, next) => {
   try {
     const { postId } = req.params;
-    const { name, price, categoryId } = req.body;
+    const { name, price, categoryId, images } = req.body;
     const socialPost = await prisma.socialPost.findUnique({ where: { id: postId } });
     if (!socialPost || socialPost.userId !== req.user.id) return res.status(404).json({ message: 'Post no encontrado' });
+
+    const validImages = (images || []).slice(0, 6).map(img => ({
+      url: img.url || 'https://picsum.photos/400/400',
+      alt: img.alt || name
+    }));
 
     const product = await prisma.product.create({
       data: {
@@ -39,7 +44,7 @@ exports.convertToProduct = async (req, res, next) => {
         categoryId: categoryId,
         postUrl: socialPost.permalink,
         socialPlatform: socialPost.platform,
-        images: socialPost.mediaUrl ? [{ url: socialPost.mediaUrl, alt: name }] : []
+        images: validImages
       }
     });
     await prisma.socialPost.update({ where: { id: postId }, data: { isConverted: true, convertedProductId: product.id } });
@@ -62,5 +67,52 @@ exports.deletePost = async (req, res, next) => {
     if (!post || post.userId !== req.user.id) return res.status(404).json({ message: 'Post no encontrado' });
     await prisma.socialPost.delete({ where: { id: req.params.postId } });
     res.json({ message: 'Post eliminado' });
+  } catch (error) { next(error); }
+};
+
+// NUEVO: Publicar en redes sociales
+exports.publishToSocial = async (req, res, next) => {
+  try {
+    const { productId, platforms, message } = req.body;
+    
+    // Validar que el producto existe y pertenece al usuario
+    const product = await prisma.product.findUnique({ where: { id: productId } });
+    if (!product || product.sellerId !== req.user.id) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    const results = [];
+    
+    // Simular publicación en cada plataforma
+    for (const platform of platforms) {
+      const socialPost = await prisma.socialPost.create({
+        data: {
+          userId: req.user.id,
+          platform: platform,
+          postId: 'pub_' + Date.now() + '_' + platform,
+          caption: message || product.description || product.name,
+          mediaUrl: product.images?.[0]?.url || 'https://picsum.photos/400/400',
+          permalink: 'https://' + platform + '.com/p/' + Date.now(),
+          likes: 0,
+          comments: 0,
+          isConverted: true,
+          convertedProductId: product.id
+        }
+      });
+      
+      results.push({ platform, success: true, postId: socialPost.id });
+      
+      notifyUser(req.user.id, 'post:published', { 
+        platform, 
+        productId: product.id,
+        productName: product.name 
+      });
+    }
+
+    logger.info('Producto publicado en: ' + platforms.join(', '));
+    res.json({ 
+      message: 'Publicado en ' + results.length + ' plataforma(s)', 
+      results 
+    });
   } catch (error) { next(error); }
 };

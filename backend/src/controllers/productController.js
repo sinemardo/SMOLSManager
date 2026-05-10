@@ -8,7 +8,6 @@ exports.getAll = async (req, res, next) => {
     const where = { isActive: true };
 
     if (category) {
-      // Buscar categoría ignorando mayúsculas/minúsculas y tildes
       const allCats = await prisma.category.findMany();
       const found = allCats.find(c => 
         c.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 
@@ -17,13 +16,8 @@ exports.getAll = async (req, res, next) => {
         category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') ||
         c.id === category
       );
-      
-      if (found) {
-        where.categoryId = found.id;
-      } else {
-        // Si no encuentra, devolver vacío
-        return res.json({ products: [], pagination: { page: 1, limit: 50, total: 0, pages: 0 } });
-      }
+      if (found) where.categoryId = found.id;
+      else return res.json({ products: [], pagination: { page: 1, limit, total: 0, pages: 0 } });
     }
     
     if (seller) where.sellerId = seller;
@@ -59,8 +53,19 @@ exports.getById = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
+    // Aceptar hasta 6 imágenes
+    const images = req.body.images || [];
+    const validImages = images.slice(0, 6).map(img => ({
+      url: img.url || 'https://picsum.photos/400/400',
+      alt: img.alt || req.body.name || 'Producto'
+    }));
+
     const product = await prisma.product.create({
-      data: { ...req.body, sellerId: req.user.id, images: req.body.images || [] }
+      data: { 
+        ...req.body, 
+        sellerId: req.user.id, 
+        images: validImages
+      }
     });
     logger.info('Producto creado: ' + product.name);
     res.status(201).json({ message: 'Producto creado', product });
@@ -69,7 +74,14 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    await prisma.product.updateMany({ where: { id: req.params.id, sellerId: req.user.id }, data: req.body });
+    // Permitir actualizar imágenes
+    if (req.body.images) {
+      req.body.images = req.body.images.slice(0, 6);
+    }
+    await prisma.product.updateMany({ 
+      where: { id: req.params.id, sellerId: req.user.id }, 
+      data: req.body 
+    });
     res.json({ message: 'Producto actualizado' });
   } catch (error) { next(error); }
 };
