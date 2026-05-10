@@ -13,14 +13,19 @@ export default function Catalog() {
   const [message, setMessage] = useState('');
   const user = JSON.parse(localStorage.getItem('smols_user') || '{}');
 
-  // Cargar categorías y sincronizar con URL
+  // Cargar TODO al inicio: categorías + productos con filtro de URL
   useEffect(() => {
-    api.get('/categories').then(r => {
-      const cats = r.data.categories || [];
+    const init = async () => {
+      // 1. Cargar categorías
+      const catsRes = await api.get('/categories');
+      const cats = catsRes.data.categories || [];
       setCategories(cats);
-      
+
+      // 2. Leer categoría de la URL
       const urlParams = new URLSearchParams(window.location.search);
       const catFromUrl = urlParams.get('category');
+      let categoryId = '';
+      
       if (catFromUrl && cats.length > 0) {
         const found = cats.find(c => 
           c.id === catFromUrl || 
@@ -29,17 +34,34 @@ export default function Catalog() {
           c.name.toLowerCase() === catFromUrl.toLowerCase() ||
           c.displayName.toLowerCase() === catFromUrl.toLowerCase()
         );
-        if (found && !sessionStorage.getItem('catalog_loaded')) { sessionStorage.setItem('catalog_loaded', '1');
-          setFilter(prev => ({ ...prev, category: found.id }));
+        if (found) {
+          categoryId = found.id;
+          setFilter({ category: found.id, search: '' });
         }
       }
-      setLoading(false);
-    });
+
+      // 3. Cargar productos con el filtro detectado
+      setLoading(true);
+      try {
+        const params = {};
+        if (categoryId) params.category = categoryId;
+        const res = await api.get('/products', { params });
+        setProducts(res.data.products || []);
+      } catch (err) {
+        setMessage('Error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
   }, []);
 
-  // Cargar productos cuando cambia el filtro o al iniciar
+  // Recargar productos cuando cambia el filtro manual (select o búsqueda)
   useEffect(() => {
-    loadProducts();
+    if (categories.length > 0) {
+      loadProducts();
+    }
   }, [filter.category, filter.search]);
 
   const loadProducts = async () => {
