@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 export default function Layout({ children, user }) {
   const [currentPath, setCurrentPath] = useState('/');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     setCurrentPath(window.location.pathname);
@@ -15,6 +16,7 @@ export default function Layout({ children, user }) {
 
   const navItems = [
     { href: '/', label: 'Dashboard', icon: '📊' },
+    { href: '/analytics', label: 'Analytics', icon: '📈' },
     { href: '/catalog', label: 'Catalogo', icon: '📦' },
     { href: '/orders', label: 'Ordenes', icon: '📋' },
     { href: '/import', label: 'Importar', icon: '📥' },
@@ -35,17 +37,36 @@ export default function Layout({ children, user }) {
               <span style={{ fontSize: 22 }}>🏪</span>
               <span style={{ fontWeight: 700, fontSize: 16, color: '#4f46e5' }}>SMOLS</span>
             </a>
-            <div style={{ display: 'flex', gap: 2, overflowX: 'auto' }}>
-              {navItems.map(item => (
-                <a key={item.href} href={item.href} style={{ padding: '8px 12px', borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 500, color: currentPath === item.href ? '#4f46e5' : '#6b7280', background: currentPath === item.href ? '#eef2ff' : 'transparent', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
-                  {item.icon} {item.label}
+            <div style={{ display: 'flex', gap: 2, overflowX: 'auto' }} className="desktop-nav">
+              {navItems.slice(0, 5).map(item => (
+                <a key={item.href} href={item.href} style={{ padding: '8px 10px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 500, color: currentPath === item.href ? '#4f46e5' : '#6b7280', background: currentPath === item.href ? '#eef2ff' : 'transparent', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                  {item.icon}
                 </a>
               ))}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 13, color: '#6b7280' }}>{user?.name?.split(' ')[0]}</span>
-            <button onClick={logout} style={{ background: 'none', border: '1px solid #e5e7eb', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 13, color: '#6b7280' }}>Salir</button>
+            <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              {user?.name?.split(' ')[0]} ▾
+            </button>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{ position: 'absolute', top: 56, right: 16, background: '#fff', borderRadius: 12, boxShadow: '0 10px 40px rgba(0,0,0,0.15)', padding: 8, minWidth: 180, zIndex: 200 }}
+                onClick={() => setMenuOpen(false)}
+              >
+                {navItems.map(item => (
+                  <a key={item.href} href={item.href} style={{ display: 'block', padding: '10px 16px', borderRadius: 8, textDecoration: 'none', fontSize: 14, color: currentPath === item.href ? '#4f46e5' : '#374151', background: currentPath === item.href ? '#eef2ff' : 'transparent' }}>
+                    {item.icon} {item.label}
+                  </a>
+                ))}
+                <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '8px 0' }} />
+                <button onClick={logout} style={{ width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: '#fef2f2', color: '#dc2626', cursor: 'pointer', fontSize: 14, textAlign: 'left' }}>
+                  🚪 Salir
+                </button>
+              </motion.div>
+            )}
           </div>
         </div>
       </motion.nav>

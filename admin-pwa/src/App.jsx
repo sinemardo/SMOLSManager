@@ -6,6 +6,7 @@ import PostsManager from './pages/PostsManager';
 import Catalog from './pages/Catalog';
 import StoreProfile from './pages/StoreProfile';
 import Orders from './pages/Orders';
+import Analytics from './pages/Analytics';
 
 function App() {
   const token = localStorage.getItem('smols_token');
@@ -23,11 +24,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/import" element={<ImportPost />} />
         <Route path="/posts" element={<PostsManager />} />
         <Route path="/catalog" element={<Catalog />} />
-        <Route path="/profile" element={<StoreProfile />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/profile" element={<StoreProfile />} />
         <Route path="/" element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
