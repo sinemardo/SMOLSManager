@@ -8,6 +8,7 @@ import StoreProfile from './pages/StoreProfile';
 import Orders from './pages/Orders';
 import Analytics from './pages/Analytics';
 import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
 
 function App() {
   const token = localStorage.getItem('smols_token');
@@ -32,6 +33,7 @@ function App() {
         <Route path="/catalog" element={<Catalog />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<StoreProfile />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/" element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
