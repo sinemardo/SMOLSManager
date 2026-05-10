@@ -13,28 +13,58 @@ BASE DE DATOS
   Dashboard: https://console.neon.tech/app/projects/wild-snow-13905032
 
 ACCESOS
-  Admin Email: admin@smolsmanager.com
-  Admin Password: admin123
-
-USUARIO REGISTRADO (PWA)
-  Email: sinemardo@gmail.com
-  (Contraseña: la que configuraste)
+  ┌─────────────┬──────────────────────────────────┬────────────┬──────────┐
+  │ Rol         │ Email                            │ Contraseña │ Panel    │
+  ├─────────────┼──────────────────────────────────┼────────────┼──────────┤
+  │ Admin       │ admin@smolsmanager.com           │ admin123   │ PWA      │
+  │ Vendedor    │ vendedor@smolsmanager.com        │ seller123  │ PWA      │
+  │ Comprador   │ comprador@smolsmanager.com       │ seller123  │ Web      │
+  └─────────────┴──────────────────────────────────┴────────────┴──────────┘
 
 URLS LOCALES
-  Backend API: http://localhost:3000
-  API Docs: http://localhost:3000/api-docs
-  Health: http://localhost:3000/api/v1/health
-  PWA Admin: http://localhost:5173
-  PWA Login: http://localhost:5173/login
-  PWA Import: http://localhost:5173/import
-  Web Pública: http://localhost:3001
+  Backend API:  http://localhost:3000
+  API Docs:     http://localhost:3000/api-docs
+  Health:       http://localhost:3000/api/v1/health
+  PWA Admin:    http://localhost:5173
+  PWA Login:    http://localhost:5173/login
+  PWA Import:   http://localhost:5173/import
+  PWA Crear:    http://localhost:5173/create
+  PWA Catálogo: http://localhost:5173/catalog
+  PWA Órdenes:  http://localhost:5173/orders
+  Web Pública:  http://localhost:3001
+
+PERFILES
+  ADMIN:
+    - Dashboard completo con KPIs
+    - Analytics con gráficos
+    - Gestión de catálogo y productos
+    - Gestión de órdenes
+    - Importar posts desde redes sociales
+    - Crear productos manualmente
+    - Configuración del sistema
+
+  VENDEDOR:
+    - Dashboard de su tienda
+    - Catálogo de sus productos
+    - Órdenes de sus clientes
+    - Importar posts (Instagram, TikTok, Facebook)
+    - Crear productos con imágenes
+    - Perfil de tienda personalizable
+
+  COMPRADOR:
+    - Web pública con catálogo
+    - Filtrar por categorías
+    - Ver detalles de productos
+    - Carrusel de imágenes
+    - (Próximamente: carrito y pedidos)
 
 COMANDOS ÚTILES
   Iniciar backend: cd backend && npm run dev
-  Iniciar PWA: cd admin-pwa && npm run dev
-  Iniciar Web: cd web && npm run dev
-  Prisma Studio: cd backend && npx prisma studio
+  Iniciar PWA:     cd admin-pwa && npm run dev
+  Iniciar Web:     cd frontend/web && npm run dev
+  Prisma Studio:   cd backend && npx prisma studio
   Seed categorías: cd backend && node prisma/seed.js
+  Ejecutar tests:  cd backend && npx jest
 
 ===========================================
 Fecha: 2026-05-10
