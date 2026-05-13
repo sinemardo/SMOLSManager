@@ -42,7 +42,7 @@ export default function BuyerPortal({ user, onBack, initialTab = 'profile' }) {
     }
     const savedWish = localStorage.getItem('buyer_wishlist');
     if (savedWish) setWishlist(JSON.parse(savedWish));
-    const savedCart = localStorage.getItem('buyer_cart');
+    const savedCart = localStorage.getItem('buyer_cart'); if (savedCart) setCart(JSON.parse(savedCart));
     if (savedCart) setCart(JSON.parse(savedCart));
   }, []);
 
@@ -110,4 +110,5 @@ export default function BuyerPortal({ user, onBack, initialTab = 'profile' }) {
     </div>
   );
 }
+
 
