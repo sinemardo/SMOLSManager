@@ -1,6 +1,8 @@
 ﻿import { useState } from 'react';
+import axios from 'axios';
 
 export default function PaymentTab({ payment, setPayment }) {
+  const [message, setMessage] = useState('');
   const [selectedGateway, setSelectedGateway] = useState('card');
 
   const gateways = [
@@ -11,9 +13,25 @@ export default function PaymentTab({ payment, setPayment }) {
     { id: 'applepay', label: 'Apple Pay', icon: '🍎' }
   ];
 
+  async function handleSavePayment(e) {
+    e.preventDefault();
+    setMessage('');
+    try {
+      const token = localStorage.getItem('smols_token');
+      await axios.post('http://localhost:3000/api/v1/payments/confirm', {
+        paymentIntentId: 'pi_simulated_' + Date.now(),
+        paymentMethod: selectedGateway,
+        amount: 0
+      }, { headers: { Authorization: 'Bearer ' + token } });
+      setMessage('✅ Método de pago guardado correctamente.');
+    } catch (err) {
+      setMessage('❌ Error: ' + (err.response?.data?.message || 'No se pudo guardar'));
+    }
+  }
+
   return (
     <div style={{ background: '#fff', padding: 32, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24 }}>💳 Métodos de Pago</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24 }}>💳 Métodos de Pago</h2>`n      {message && <div style={{ padding: 12, borderRadius: 8, marginBottom: 16, background: message.includes("✅") ? "#ecfdf5" : "#fef2f2", color: message.includes("✅") ? "#059669" : "#dc2626" }}>{message}</div>}
       <p style={{ color: '#64748b', marginBottom: 32, fontSize: 14 }}>
         Selecciona tu pasarela de pago favorita. Todas son seguras y oficiales.
       </p>
@@ -35,7 +53,7 @@ export default function PaymentTab({ payment, setPayment }) {
 
       {/* Formulario de tarjeta (se muestra solo si se selecciona 'card') */}
       {selectedGateway === 'card' && (
-        <form onSubmit={(e) => { e.preventDefault(); alert('Método de pago guardado correctamente.'); }} style={{ maxWidth: 500 }}>
+        <form onSubmit={handleSavePayment} style={{ maxWidth: 500 }}>
           <div style={{ display: 'grid', gap: 16 }}>
             <div><label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Titular</label><input value={payment.name} onChange={e => setPayment({...payment, name: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, boxSizing: 'border-box' }} /></div>
             <div><label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Número de tarjeta</label><input value={payment.cardNumber} onChange={e => setPayment({...payment, cardNumber: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, boxSizing: 'border-box' }} maxLength={19} /></div>
@@ -69,3 +87,4 @@ export default function PaymentTab({ payment, setPayment }) {
     </div>
   );
 }
+

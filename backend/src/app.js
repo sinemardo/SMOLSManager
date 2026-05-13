@@ -14,6 +14,7 @@ const orderRoutes = require('./routes/orders');
 const kpiRoutes = require('./routes/kpis');
 const healthRoutes = require('./routes/health');
 const socialRoutes = require('./routes/social');
+const paymentRoutes = require('./routes/payments');
 
 const app = express();
 
@@ -37,9 +38,11 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/kpis', kpiRoutes);
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/social', socialRoutes);
+app.use('/api/v1/payments', paymentRoutes);
 
 app.get('/', (req, res) => res.json({ message: 'SMOLSManager API', version: '1.0.0' }));
 app.use((req, res) => res.status(404).json({ message: 'Ruta no encontrada' }));
 app.use(errorHandler);
 
 module.exports = app;
+
