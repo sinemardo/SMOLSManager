@@ -1,7 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import BuyerPortal from './pages/BuyerPortal';
 import Navbar from './components/Navbar';
+import BuyerPortal from './pages/BuyerPortal';
 
 const API = 'http://localhost:3000/api/v1';
 
@@ -17,9 +17,9 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
-  const [wishlist, setWishlist] = useState([]);
-  const [portalTab, setPortalTab] = useState('profile');
   const [showPortal, setShowPortal] = useState(false);
+  const [portalTab, setPortalTab] = useState('cart');
+  const [wishlist, setWishlist] = useState([]);
   const [showWishlist, setShowWishlist] = useState(false);
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
@@ -34,7 +34,14 @@ export default function App() {
         .then(r => setUser(r.data.user))
         .catch(() => localStorage.removeItem('smols_token'));
     }
+    const savedCart = localStorage.getItem('buyer_cart');
+    if (savedCart) setCart(JSON.parse(savedCart));
+    const savedWish = localStorage.getItem('buyer_wishlist');
+    if (savedWish) setWishlist(JSON.parse(savedWish));
   }, []);
+
+  useEffect(() => { localStorage.setItem('buyer_cart', JSON.stringify(cart)); }, [cart]);
+  useEffect(() => { localStorage.setItem('buyer_wishlist', JSON.stringify(wishlist)); }, [wishlist]);
 
   function loadProducts(cat) {
     setSelectedCategory(cat);
@@ -64,7 +71,6 @@ export default function App() {
     });
   }
 
-  function navigateToPortal(tab) { setPortalTab(tab); setShowPortal(true); }
   function toggleWishlist(product, e) {
     if (e) e.stopPropagation();
     setWishlist(prev => {
@@ -74,22 +80,42 @@ export default function App() {
     });
   }
 
+  function navigateToPortal(tab) {
+    setPortalTab(tab);
+    setShowPortal(true);
+  }
+
   if (showPortal) return <BuyerPortal user={user} onBack={() => setShowPortal(false)} initialTab={portalTab} />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      <Navbar user={user} cartCount={cartCount} wishlistCount={wishlist.length} onNavigate={navigateToPortal} onShowCart={() => setShowCart(true)} onShowWishlist={() => setShowWishlist(true)} onLogout={() => { localStorage.removeItem("smols_token"); setUser(null); setCart([]); setWishlist([]); }} onShowAuth={() => setShowAuth(true)} onSetAuthMode={(mode) => setAuthMode(mode)} />
+      <Navbar
+        user={user}
+        cartCount={cartCount}
+        wishlistCount={wishlist.length}
+        onNavigate={navigateToPortal}
+        onShowCart={() => setShowCart(true)}
+        onShowWishlist={() => setShowWishlist(true)}
+        onLogout={() => { localStorage.removeItem('smols_token'); setUser(null); setCart([]); setWishlist([]); }}
+        onShowAuth={() => setShowAuth(true)}
+        onSetAuthMode={(mode) => setAuthMode(mode)}
+      />
 
       {showAuth && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }} onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}>
           <div style={{ background: '#fff', padding: 32, borderRadius: 16, width: 380 }}>
-            <h2 style={{ textAlign: 'center', marginBottom: 16 }}>{authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: 16 }}>{authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesion'}</h2>
             {authMsg && <div style={{ padding: 10, borderRadius: 8, marginBottom: 12, background: '#fef2f2', color: '#dc2626', fontSize: 13 }}>{authMsg}</div>}
             <form onSubmit={handleAuth} style={{ display: 'grid', gap: 10 }}>
-              {authMode === 'register' && <><input type="text" placeholder="Nombre" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} style={{ padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8 }} required /><input type="text" placeholder="Tienda (opcional)" value={authForm.storeName} onChange={e => setAuthForm({...authForm, storeName: e.target.value})} style={{ padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8 }} /></>}
+              {authMode === 'register' && (
+                <>
+                  <input type="text" placeholder="Nombre" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} style={{ padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8 }} required />
+                  <input type="text" placeholder="Tienda" value={authForm.storeName} onChange={e => setAuthForm({...authForm, storeName: e.target.value})} style={{ padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8 }} />
+                </>
+              )}
               <input type="email" placeholder="Email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} style={{ padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8 }} required />
-              <input type="password" placeholder="Contraseña" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} style={{ padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8 }} required />
-              <button type="submit" style={{ padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>{authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}</button>
+              <input type="password" placeholder="Contrasena" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} style={{ padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8 }} required />
+              <button type="submit" style={{ padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>{authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesion'}</button>
             </form>
             <button onClick={() => setShowAuth(false)} style={{ width: '100%', marginTop: 8, padding: 8, background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>Cancelar</button>
           </div>
@@ -100,10 +126,15 @@ export default function App() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 250, padding: 16 }} onClick={(e) => { if (e.target === e.currentTarget) setShowCart(false); }}>
           <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 500, padding: 28 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700 }}>🛒 Carrito ({cartCount})</h2>
-              <button onClick={() => setShowCart(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <h2 style={{ fontSize: 20, fontWeight: 700 }}>Carrito ({cartCount})</h2>
+              <button onClick={() => setShowCart(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>X</button>
             </div>
-            {cart.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>Carrito vacío</p><button onClick={() => { setShowCart(false); setPortalTab("cart"); setShowPortal(true); }} style={{ marginTop: 16, width: "100%", padding: "12px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>Ir al carrito</button> : (
+            {cart.length === 0 ? (
+              <>
+                <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>Carrito vacio</p>
+                <button onClick={() => { setShowCart(false); navigateToPortal('cart'); }} style={{ marginTop: 16, width: '100%', padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Ir al carrito</button>
+              </>
+            ) : (
               <>
                 {cart.map(item => (
                   <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
@@ -117,9 +148,9 @@ export default function App() {
                   <span style={{ fontSize: 18, fontWeight: 700 }}>Total</span>
                   <span style={{ fontSize: 22, fontWeight: 700, color: '#6366f1' }}>€{cartTotal.toFixed(2)}</span>
                 </div>
+                <button onClick={() => { setShowCart(false); navigateToPortal('cart'); }} style={{ marginTop: 16, width: '100%', padding: '12px', background: '#059669', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Realizar pedido</button>
               </>
             )}
-              {cart.length === 0 && <button onClick={() => { setShowCart(false); setShowPortal(true); }} style={{ marginTop: 16, width: '100%', padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>📋 Ver en Mi Portal</button>}
           </div>
         </div>
       )}
@@ -128,10 +159,15 @@ export default function App() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 260, padding: 16 }} onClick={(e) => { if (e.target === e.currentTarget) setShowWishlist(false); }}>
           <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 450, padding: 28 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700 }}>❤️ Favoritos ({wishlist.length})</h2>
-              <button onClick={() => setShowWishlist(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <h2 style={{ fontSize: 20, fontWeight: 700 }}>Favoritos ({wishlist.length})</h2>
+              <button onClick={() => setShowWishlist(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>X</button>
             </div>
-            {wishlist.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>No tienes favoritos</p><button onClick={() => { setShowWishlist(false); setPortalTab("wishlist"); setShowPortal(true); }} style={{ marginTop: 16, width: "100%", padding: "12px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>Ver favoritos</button> : (
+            {wishlist.length === 0 ? (
+              <>
+                <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>No tienes favoritos</p>
+                <button onClick={() => { setShowWishlist(false); navigateToPortal('wishlist'); }} style={{ marginTop: 16, width: '100%', padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Ver favoritos</button>
+              </>
+            ) : (
               wishlist.map(item => (
                 <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
                   <div>
@@ -142,7 +178,17 @@ export default function App() {
                 </div>
               ))
             )}
-              {wishlist.length === 0 && <button onClick={() => { setShowWishlist(false); setShowPortal(true); }} style={{ marginTop: 16, width: '100%', padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>📋 Ver en Mi Portal</button>}
+          </div>
+        </div>
+      )}
+
+      {selectedProduct && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 16 }} onClick={(e) => { if (e.target === e.currentTarget) setSelectedProduct(null); }}>
+          <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 650, padding: 28 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700 }}>{selectedProduct.name}</h2>
+            <p style={{ fontSize: 28, fontWeight: 700, color: '#6366f1', marginTop: 8 }}>€{selectedProduct.price}</p>
+            <p style={{ color: '#64748b', marginTop: 12 }}>{selectedProduct.description}</p>
+            <button onClick={() => setSelectedProduct(null)} style={{ width: '100%', marginTop: 20, padding: '14px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 600, cursor: 'pointer' }}>Cerrar</button>
           </div>
         </div>
       )}
@@ -153,7 +199,7 @@ export default function App() {
       </header>
 
       <section style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
-        <h2 style={{ fontSize: 26, fontWeight: 700, textAlign: 'center', marginBottom: 28 }}>Categorías</h2>
+        <h2 style={{ fontSize: 26, fontWeight: 700, textAlign: 'center', marginBottom: 28 }}>Categorias</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 40 }}>
           <button onClick={() => loadProducts('')} style={{ padding: '10px 22px', borderRadius: 25, border: 'none', background: !selectedCategory ? '#6366f1' : '#fff', color: !selectedCategory ? '#fff' : '#475569', cursor: 'pointer', fontWeight: 600 }}>Todas</button>
           {categories.map(cat => (
@@ -176,33 +222,12 @@ export default function App() {
                 <button onClick={(e) => toggleWishlist(p, e)} style={{ width: '100%', padding: '6px', background: wishlist.some(i => i.productId === p.id) ? '#fef2f2' : '#f8fafc', color: wishlist.some(i => i.productId === p.id) ? '#dc2626' : '#94a3b8', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer', fontSize: 16 }}>
                   {wishlist.some(i => i.productId === p.id) ? '❤️' : '🤍'}
                 </button>
-                <button onClick={(e) => addToCart(p, e)} style={{ width: '100%', marginTop: 6, padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>🛒 Agregar al carrito</button>
+                <button onClick={(e) => addToCart(p, e)} style={{ width: '100%', marginTop: 6, padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Agregar al carrito</button>
               </div>
             </div>
           ))}
         </div>
       </section>
-
-      {selectedProduct && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 16 }} onClick={(e) => { if (e.target === e.currentTarget) setSelectedProduct(null); }}>
-          <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 650, padding: 28 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 700 }}>{selectedProduct.name}</h2>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#6366f1', marginTop: 8 }}>€{selectedProduct.price}</p>
-            <p style={{ color: '#64748b', marginTop: 12 }}>{selectedProduct.description}</p>
-            <button onClick={() => setSelectedProduct(null)} style={{ width: '100%', marginTop: 20, padding: '14px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 600, cursor: 'pointer' }}>Cerrar</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
