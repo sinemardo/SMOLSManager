@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import axios from 'axios';
+import BuyerPortal from './pages/BuyerPortal';
 import Navbar from './components/Navbar';
 
 const API = 'http://localhost:3000/api/v1';
@@ -17,6 +18,8 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [wishlist, setWishlist] = useState([]);
+  const [portalTab, setPortalTab] = useState('profile');
+  const [showPortal, setShowPortal] = useState(false);
   const [showWishlist, setShowWishlist] = useState(false);
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
@@ -61,6 +64,7 @@ export default function App() {
     });
   }
 
+  function navigateToPortal(tab) { setPortalTab(tab); setShowPortal(true); }
   function toggleWishlist(product, e) {
     if (e) e.stopPropagation();
     setWishlist(prev => {
@@ -72,7 +76,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      <Navbar user={user} cartCount={cartCount} wishlistCount={wishlist.length} onShowCart={() => setShowCart(true)} onShowWishlist={() => setShowWishlist(true)} onShowPortal={() => setShowPortal(true)} onLogout={() => { localStorage.removeItem("smols_token"); setUser(null); setCart([]); setWishlist([]); }} onShowAuth={() => setShowAuth(true)} onSetAuthMode={(mode) => setAuthMode(mode)} />
+      <Navbar user={user} cartCount={cartCount} wishlistCount={wishlist.length} onNavigate={navigateToPortal} onLogout={() => { localStorage.removeItem("smols_token"); setUser(null); setCart([]); setWishlist([]); }} onShowAuth={() => setShowAuth(true)} onSetAuthMode={(mode) => setAuthMode(mode)} />
 
       {showAuth && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }} onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}>
@@ -190,6 +194,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 

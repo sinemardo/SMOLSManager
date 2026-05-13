@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react';
 
-export default function Navbar({ user, cartCount, wishlistCount, onShowCart, onShowWishlist, onShowPortal, onLogout, onShowAuth, onSetAuthMode }) {
+export default function Navbar({ user, cartCount, wishlistCount, onNavigate, onShowCart, onShowWishlist, onLogout, onShowAuth, onSetAuthMode }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -10,7 +10,7 @@ export default function Navbar({ user, cartCount, wishlistCount, onShowCart, onS
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {user ? (
           <>
-            {/* Botones de acceso rápido */}
+            {/* Iconos rápidos -> abren modales */}
             <button onClick={onShowWishlist} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', position: 'relative' }}>
               ❤️ {wishlistCount > 0 && <span style={{ position: 'absolute', top: -6, right: -6, background: '#dc2626', color: '#fff', fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{wishlistCount}</span>}
             </button>
@@ -18,12 +18,12 @@ export default function Navbar({ user, cartCount, wishlistCount, onShowCart, onS
               🛒 {cartCount > 0 && <span style={{ position: 'absolute', top: -6, right: -6, background: '#dc2626', color: '#fff', fontSize: 10, fontWeight: 700, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{cartCount}</span>}
             </button>
 
-            {/* Avatar circular */}
+            {/* Avatar -> abre menú */}
             <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: '#6366f1', color: '#fff', border: 'none', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {user.name?.charAt(0)?.toUpperCase() || 'U'}
             </button>
 
-            {/* Menú hamburguesa */}
+            {/* Hamburguesa -> abre menú */}
             <div style={{ position: 'relative' }}>
               <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', padding: '4px 8px' }}>☰</button>
               
@@ -33,9 +33,10 @@ export default function Navbar({ user, cartCount, wishlistCount, onShowCart, onS
                     <p style={{ fontWeight: 600, fontSize: 14, color: '#1f2937' }}>{user.name}</p>
                     <p style={{ fontSize: 12, color: '#64748b' }}>{user.email}</p>
                   </div>
-                  <button onClick={() => { onShowPortal(); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 14, color: '#374151' }}>👤 Mi Portal</button>
-                  <button onClick={() => { onShowWishlist(); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 14, color: '#374151' }}>❤️ Favoritos</button>
-                  <button onClick={() => { onShowCart(); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 14, color: '#374151' }}>🛒 Carrito</button>
+                  <button onClick={() => { onNavigate('profile'); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 14, color: '#374151' }}>👤 Mi Portal</button>
+                  <button onClick={() => { onNavigate('wishlist'); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 14, color: '#374151' }}>❤️ Favoritos</button>
+                  <button onClick={() => { onNavigate('cart'); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 14, color: '#374151' }}>🛒 Carrito</button>
+                  <button onClick={() => { onNavigate('orders'); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 14, color: '#374151' }}>📋 Historial</button>
                   <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '4px 0' }} />
                   <button onClick={() => { onLogout(); setMenuOpen(false); }} style={{ display: 'block', width: '100%', padding: '10px 16px', border: 'none', borderRadius: 8, background: '#fef2f2', color: '#dc2626', cursor: 'pointer', textAlign: 'left', fontSize: 14 }}>🚪 Cerrar sesión</button>
                 </div>

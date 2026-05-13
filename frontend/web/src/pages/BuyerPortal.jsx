@@ -3,8 +3,8 @@ import axios from 'axios';
 
 const API = 'http://localhost:3000/api/v1';
 
-export default function BuyerPortal({ user, onBack }) {
-  const [activeTab, setActiveTab] = useState('profile');
+export default function BuyerPortal({ user, onBack, initialTab = "profile" }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [orders, setOrders] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [cart, setCart] = useState([]);
@@ -188,3 +188,4 @@ export default function BuyerPortal({ user, onBack }) {
     </div>
   );
 }
+
