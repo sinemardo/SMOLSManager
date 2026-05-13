@@ -97,7 +97,7 @@ export default function App() {
               <h2 style={{ fontSize: 20, fontWeight: 700 }}>🛒 Carrito ({cartCount})</h2>
               <button onClick={() => setShowCart(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
-            {cart.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>Carrito vacío</p> : (
+            {cart.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>Carrito vacío</p><button onClick={() => { setShowCart(false); setShowPortal(true); }} style={{ marginTop: 16, width: "100%", padding: "12px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>📋 Ver en Mi Portal</button> : (
               <>
                 {cart.map(item => (
                   <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
@@ -124,7 +124,7 @@ export default function App() {
               <h2 style={{ fontSize: 20, fontWeight: 700 }}>❤️ Favoritos ({wishlist.length})</h2>
               <button onClick={() => setShowWishlist(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
-            {wishlist.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>No tienes favoritos</p> : (
+            {wishlist.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>No tienes favoritos</p><button onClick={() => { setShowWishlist(false); setShowPortal(true); }} style={{ marginTop: 16, width: "100%", padding: "12px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>📋 Ver en Mi Portal</button> : (
               wishlist.map(item => (
                 <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
                   <div>
@@ -188,5 +188,6 @@ export default function App() {
     </div>
   );
 }
+
 
 
