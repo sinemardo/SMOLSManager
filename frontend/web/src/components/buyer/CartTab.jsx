@@ -1,4 +1,4 @@
-﻿export default function CartTab({ cart, setCart, updateCartQty, removeFromCart, moveToWishlist, cartTotal }) {
+﻿export default function CartTab({ cart, setCart, updateCartQty, removeFromCart, moveToWishlist, cartTotal, onCheckout }) {
   return (
     <div style={{ background: '#fff', padding: 32, borderRadius: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -23,9 +23,10 @@
             <span style={{ fontSize: 18, fontWeight: 700 }}>Total</span>
             <span style={{ fontSize: 22, fontWeight: 700, color: '#6366f1' }}>€{cartTotal.toFixed(2)}</span>
           </div>
-          <button style={{ width: '100%', marginTop: 16, padding: '14px', background: '#059669', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>Realizar Pedido</button>
+          <button onClick={onCheckout} style={{ width: "100%", marginTop: 16, padding: "14px", background: "#059669", color: "#fff", border: "none", borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: "pointer" }}>Realizar Pedido</button>
         </>
       )}
     </div>
   );
 }
+

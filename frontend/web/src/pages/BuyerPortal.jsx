@@ -6,6 +6,7 @@ import WishlistTab from '../components/buyer/WishlistTab';
 import OrdersTab from '../components/buyer/OrdersTab';
 import ShippingTab from '../components/buyer/ShippingTab';
 import PaymentTab from '../components/buyer/PaymentTab';
+import CheckoutPortal from '../components/buyer/CheckoutPortal';
 
 const API = 'http://localhost:3000/api/v1';
 
@@ -100,7 +101,7 @@ export default function BuyerPortal({ user, onBack, initialTab = 'profile' }) {
           ))}
         </div>
         {activeTab === 'profile' && <ProfileTab profile={profile} setProfile={setProfile} profileImage={profileImage} setProfileImage={setProfileImage} />}
-        {activeTab === 'cart' && <CartTab cart={cart} setCart={setCart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} moveToWishlist={moveToWishlist} cartTotal={cartTotal} />}
+        {activeTab === 'cart' && <CartTab cart={cart} setCart={setCart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} moveToWishlist={moveToWishlist} cartTotal={cartTotal} onCheckout={() => setShowCheckout(true)} />}
         {activeTab === 'wishlist' && <WishlistTab wishlist={wishlist} addToCartFromWishlist={addToCartFromWishlist} removeFromWishlist={removeFromWishlist} />}
         {activeTab === 'orders' && <OrdersTab orders={orders} loading={loading} />}
         {activeTab === 'shipping' && <ShippingTab shipping={shipping} setShipping={setShipping} />}
@@ -109,3 +110,4 @@ export default function BuyerPortal({ user, onBack, initialTab = 'profile' }) {
     </div>
   );
 }
+
