@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from './components/Navbar';
 
 const API = 'http://localhost:3000/api/v1';
 
@@ -71,24 +72,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      <nav style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 64 }}>
-        <span style={{ fontWeight: 700, fontSize: 20, color: '#6366f1' }}>SMOLS</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {user ? (
-            <>
-              <button onClick={() => setShowWishlist(true)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>❤️{wishlist.length > 0 ? wishlist.length : ''}</button>
-              <button onClick={() => setShowCart(true)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer' }}>🛒{cartCount > 0 ? cartCount : ''}</button>
-              <div style={{ position: "relative", display: "inline-block" }}>`n              <button onClick={() => setShowPortal(!showPortal)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#475569", fontWeight: 500 }}>{user.name} ▾</button>`n            </div>
-              <button onClick={() => { localStorage.removeItem('smols_token'); setUser(null); setCart([]); setWishlist([]); }} style={{ padding: '8px 16px', border: '1px solid #e2e8f0', borderRadius: 8, background: 'none', cursor: 'pointer' }}>Salir</button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => { setShowAuth(true); setAuthMode('login'); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Iniciar sesión</button>
-              <button onClick={() => { setShowAuth(true); setAuthMode('register'); }} style={{ padding: '10px 20px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>Comenzar a vender</button>
-            </>
-          )}
-        </div>
-      </nav>
+      <Navbar user={user} cartCount={cartCount} wishlistCount={wishlist.length} onShowCart={() => setShowCart(true)} onShowWishlist={() => setShowWishlist(true)} onShowPortal={() => setShowPortal(true)} onLogout={() => { localStorage.removeItem("smols_token"); setUser(null); setCart([]); setWishlist([]); }} onShowAuth={() => setShowAuth(true)} onSetAuthMode={(mode) => setAuthMode(mode)} />
 
       {showAuth && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }} onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}>
@@ -204,4 +188,5 @@ export default function App() {
     </div>
   );
 }
+
 
