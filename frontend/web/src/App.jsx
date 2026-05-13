@@ -16,6 +16,7 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [wishlist, setWishlist] = useState([]);
+  const [showMenu, setShowMenu] = useState(false);
   const [showWishlist, setShowWishlist] = useState(false);
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
@@ -78,7 +79,18 @@ export default function App() {
             <>
               <button onClick={() => setShowWishlist(true)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>❤️{wishlist.length > 0 ? wishlist.length : ''}</button>
               <button onClick={() => setShowCart(true)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer' }}>🛒{cartCount > 0 ? cartCount : ''}</button>
-              <div style={{ position: "relative", display: "inline-block" }}>`n              <button onClick={() => setShowPortal(!showPortal)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#475569", fontWeight: 500 }}>{user.name} ▾</button>`n            </div>
+              <div style={{ position: "relative" }}>
+              <button onClick={() => setShowMenu(!showMenu)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#475569", fontWeight: 500 }}>👤 {user.name} ▾</button>
+              {showMenu && (
+                <div style={{ position: "absolute", top: 40, right: 0, background: "#fff", borderRadius: 12, boxShadow: "0 10px 40px rgba(0,0,0,0.15)", padding: 8, minWidth: 180, zIndex: 500 }}>
+                  <button onClick={() => { setShowPortal(true); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "10px 16px", border: "none", borderRadius: 8, background: "none", cursor: "pointer", textAlign: "left", fontSize: 14, color: "#374151" }}>📋 Mi Portal</button>
+                  <button onClick={() => { setShowWishlist(true); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "10px 16px", border: "none", borderRadius: 8, background: "none", cursor: "pointer", textAlign: "left", fontSize: 14, color: "#374151" }}>❤️ Favoritos</button>
+                  <button onClick={() => { setShowCart(true); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "10px 16px", border: "none", borderRadius: 8, background: "none", cursor: "pointer", textAlign: "left", fontSize: 14, color: "#374151" }}>🛒 Carrito</button>
+                  <hr style={{ border: "none", borderTop: "1px solid #e5e7eb", margin: "4px 0" }} />
+                  <button onClick={() => { localStorage.removeItem("smols_token"); setUser(null); setCart([]); setWishlist([]); setShowMenu(false); }} style={{ display: "block", width: "100%", padding: "10px 16px", border: "none", borderRadius: 8, background: "#fef2f2", color: "#dc2626", cursor: "pointer", textAlign: "left", fontSize: 14 }}>🚪 Cerrar sesión</button>
+                </div>
+              )}
+            </div>
               <button onClick={() => { localStorage.removeItem('smols_token'); setUser(null); setCart([]); setWishlist([]); }} style={{ padding: '8px 16px', border: '1px solid #e2e8f0', borderRadius: 8, background: 'none', cursor: 'pointer' }}>Salir</button>
             </>
           ) : (
@@ -113,7 +125,8 @@ export default function App() {
               <h2 style={{ fontSize: 20, fontWeight: 700 }}>🛒 Carrito ({cartCount})</h2>
               <button onClick={() => setShowCart(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
-            {cart.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>Carrito vacío</p> : (
+            {cart.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>Carrito vacío</p>
+              <button onClick={() => { setShowCart(false); setShowPortal(true); }} style={{ marginTop: 16, width: '100%', padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>📋 Ver en Mi Portal</button> : (
               <>
                 {cart.map(item => (
                   <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
@@ -140,7 +153,8 @@ export default function App() {
               <h2 style={{ fontSize: 20, fontWeight: 700 }}>❤️ Favoritos ({wishlist.length})</h2>
               <button onClick={() => setShowWishlist(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
-            {wishlist.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>No tienes favoritos</p> : (
+            {wishlist.length === 0 ? <p style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>No tienes favoritos</p>
+              <button onClick={() => { setShowWishlist(false); setShowPortal(true); }} style={{ marginTop: 16, width: '100%', padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>📋 Ver en Mi Portal</button> : (
               wishlist.map(item => (
                 <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
                   <div>
@@ -204,4 +218,6 @@ export default function App() {
     </div>
   );
 }
+
+
 
