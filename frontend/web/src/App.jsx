@@ -78,7 +78,7 @@ export default function App() {
             <>
               <button onClick={() => setShowWishlist(true)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>❤️{wishlist.length > 0 ? wishlist.length : ''}</button>
               <button onClick={() => setShowCart(true)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer' }}>🛒{cartCount > 0 ? cartCount : ''}</button>
-              <span>{user.name}</span>
+              <div style={{ position: "relative", display: "inline-block" }}>`n              <button onClick={() => setShowPortal(!showPortal)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#475569", fontWeight: 500 }}>{user.name} ▾</button>`n            </div>
               <button onClick={() => { localStorage.removeItem('smols_token'); setUser(null); setCart([]); setWishlist([]); }} style={{ padding: '8px 16px', border: '1px solid #e2e8f0', borderRadius: 8, background: 'none', cursor: 'pointer' }}>Salir</button>
             </>
           ) : (
@@ -204,3 +204,4 @@ export default function App() {
     </div>
   );
 }
+
