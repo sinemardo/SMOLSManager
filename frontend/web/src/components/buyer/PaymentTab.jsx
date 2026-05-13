@@ -22,7 +22,7 @@ export default function PaymentTab() {
       const res = await axios.get(API + '/payments/methods', {
         headers: { Authorization: 'Bearer ' + token }
       });
-      setMethods(res.data.methods);
+      setMethods(res.data.methods || []);
     } catch (err) {
       setMessage('Error al cargar métodos de pago');
     } finally { setLoading(false); }
@@ -81,7 +81,7 @@ export default function PaymentTab() {
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24 }}>💳 Métodos de Pago ({methods.length}/3)</h2>
       {message && <div style={{ padding: 12, borderRadius: 8, marginBottom: 16, background: message.includes('✅') ? '#ecfdf5' : '#fef2f2', color: message.includes('✅') ? '#059669' : '#dc2626' }}>{message}</div>}
 
-      {/* Lista de métodos guardados */}
+      {/* Estado vacío: solo se muestra si no hay métodos y no se está mostrando el formulario */}
       {methods.length === 0 && !showForm && (
         <div style={{ textAlign: 'center', padding: 40, background: '#f8fafc', borderRadius: 12 }}>
           <p style={{ color: '#64748b' }}>No tienes métodos de pago guardados.</p>
@@ -91,33 +91,36 @@ export default function PaymentTab() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: 12, marginBottom: 24 }}>
-        {methods.map(m => (
-          <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, background: '#f8fafc', borderRadius: 10, border: m.isDefault ? '2px solid #6366f1' : '1px solid #e2e8f0' }}>
-            <div>
-              <span style={{ fontWeight: 600 }}>{m.type === 'card' ? '💳 ' + (m.details.brand || 'Tarjeta') + ' ···· ' + (m.details.last4 || '****') : m.type}</span>
-              {m.isDefault && <span style={{ marginLeft: 8, background: '#eef2ff', color: '#6366f1', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>Predeterminado</span>}
+      {/* Lista de métodos guardados */}
+      {methods.length > 0 && (
+        <div style={{ display: 'grid', gap: 12, marginBottom: 24 }}>
+          {methods.map(m => (
+            <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, background: '#f8fafc', borderRadius: 10, border: m.isDefault ? '2px solid #6366f1' : '1px solid #e2e8f0' }}>
+              <div>
+                <span style={{ fontWeight: 600 }}>{m.type === 'card' ? '💳 ' + (m.details.brand || 'Tarjeta') + ' ···· ' + (m.details.last4 || '****') : m.type}</span>
+                {m.isDefault && <span style={{ marginLeft: 8, background: '#eef2ff', color: '#6366f1', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>Predeterminado</span>}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {!m.isDefault && (
+                  <button onClick={() => handleSetDefault(m.id)} style={{ background: 'none', border: '1px solid #6366f1', color: '#6366f1', padding: '6px 12px', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
+                    Establecer por defecto
+                  </button>
+                )}
+                <button onClick={() => handleDelete(m.id)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 16 }}>🗑️</button>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {!m.isDefault && (
-                <button onClick={() => handleSetDefault(m.id)} style={{ background: 'none', border: '1px solid #6366f1', color: '#6366f1', padding: '6px 12px', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
-                  Establecer por defecto
-                </button>
-              )}
-              <button onClick={() => handleDelete(m.id)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 16 }}>🗑️</button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Botón para añadir nuevo */}
-      {methods.length < 3 && !showForm && (
+      {/* Botón para añadir nuevo: solo se muestra si hay entre 1 y 2 métodos, y no se está mostrando el formulario */}
+      {methods.length > 0 && methods.length < 3 && !showForm && (
         <button onClick={() => setShowForm(true)} style={{ padding: '10px 20px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
-          + Añadir método de pago
+          + Añadir otro método
         </button>
       )}
 
-      {/* Formulario para añadir */}
+      {/* Formulario para añadir nuevo método */}
       {showForm && (
         <div style={{ marginTop: 20, padding: 24, background: '#f8fafc', borderRadius: 12 }}>
           <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Nuevo método de pago</h3>
