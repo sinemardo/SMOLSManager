@@ -4,7 +4,7 @@ const logger = require('../config/logger');
 // ... (mantener createPaymentIntent, confirmPayment simulados)
 
 // Obtener métodos de pago del usuario
-exports.getPaymentMethods = async (req, res) => {
+exports.getPaymentMethods = async (req, res, next) => {
   try {
     const methods = await prisma.paymentMethod.findMany({
       where: { userId: req.user.id },

@@ -1,4 +1,4 @@
-﻿generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -22,6 +22,7 @@ model User {
   orders        Order[]        @relation("BuyerOrders")
   events        Event[]
   socialPosts   SocialPost[]
+  paymentMethods PaymentMethod[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -147,27 +148,15 @@ model SocialPost {
   @@map("social_posts")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// ... (todos los modelos existentes se mantienen, añadir al final)
-
 model PaymentMethod {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // "card", "paypal", "stripe", "googlepay", "applepay"
-  details   Json     @default("{}") // { last4, brand, email, etc. }
+  type      String
+  details   Json     @default("{}")
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("payment_methods")
 }
-

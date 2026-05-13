@@ -22,12 +22,11 @@ exports.register = async (req, res, next) => {
     });
 
     const tokens = await generateTokens(user.id);
-    await prisma.refreshToken.create({
-      data: { token: tokens.refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), userId: user.id }
-    });
-
-    await prisma.event.create({
-      data: { type: 'user:registered', userId: user.id, metadata: { source: req.get('X-Client-Type') || 'web' } }
+    // Usar upsert para evitar duplicados
+    await prisma.refreshToken.upsert({
+      where: { token: tokens.refreshToken },
+      update: { expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      create: { token: tokens.refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), userId: user.id }
     });
 
     logger.info('Usuario registrado: ' + user.email);
@@ -45,12 +44,11 @@ exports.login = async (req, res, next) => {
     if (!valid) throw new ApiError('Credenciales invalidas', 401);
 
     const tokens = await generateTokens(user.id);
-    await prisma.refreshToken.create({
-      data: { token: tokens.refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), userId: user.id }
-    });
-
-    await prisma.event.create({
-      data: { type: 'user:login', userId: user.id, metadata: { source: req.get('X-Client-Type') || 'web' } }
+    // Usar upsert para evitar duplicados
+    await prisma.refreshToken.upsert({
+      where: { token: tokens.refreshToken },
+      update: { expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      create: { token: tokens.refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), userId: user.id }
     });
 
     logger.info('Login: ' + user.email);
