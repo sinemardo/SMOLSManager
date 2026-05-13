@@ -74,9 +74,11 @@ export default function App() {
     });
   }
 
+  if (showPortal) return <BuyerPortal user={user} onBack={() => setShowPortal(false)} initialTab={portalTab} />;
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      <Navbar user={user} cartCount={cartCount} wishlistCount={wishlist.length} onNavigate={navigateToPortal} onLogout={() => { localStorage.removeItem("smols_token"); setUser(null); setCart([]); setWishlist([]); }} onShowAuth={() => setShowAuth(true)} onSetAuthMode={(mode) => setAuthMode(mode)} />
+      <Navbar user={user} cartCount={cartCount} wishlistCount={wishlist.length} onNavigate={navigateToPortal} onShowCart={() => setShowCart(true)} onShowWishlist={() => setShowWishlist(true)} onLogout={() => { localStorage.removeItem("smols_token"); setUser(null); setCart([]); setWishlist([]); }} onShowAuth={() => setShowAuth(true)} onSetAuthMode={(mode) => setAuthMode(mode)} />
 
       {showAuth && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }} onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}>
@@ -194,6 +196,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 
