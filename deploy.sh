@@ -1,31 +1,25 @@
-﻿#!/bin/bash
-# SMOLSManager - Deploy Script
+#!/bin/sh
 
-echo "🚀 Desplegando SMOLSManager..."
+set -e
 
-# Backend
-echo "📦 Construyendo backend..."
-cd backend
-npm ci
-npx prisma generate
-npx prisma db push
-cd ..
+echo "🚀 Deploying SMOLSManager production stack..."
 
-# PWA
-echo "🎨 Construyendo PWA..."
-cd admin-pwa
-npm ci
-npm run build
-cd ..
+if [ ! -f .env.production ]; then
+  echo "⚠️ .env.production not found"
+  echo "Creating from template..."
+  cp .env.production.example .env.production
+  echo "Please edit .env.production before continuing"
+  exit 1
+fi
 
-# Web pública
-echo "🌐 Construyendo Web..."
-cd web
-npm ci
-npm run build
-cd ..
+echo "📦 Building containers..."
+docker compose -f docker-compose.prod.yml build
 
-echo "✅ Deploy listo!"
-echo "Backend: node backend/src/server.js"
-echo "PWA: npx serve admin-pwa/dist"
-echo "Web: npx serve web/.next"
+echo "🗄️ Starting services..."
+docker compose -f docker-compose.prod.yml up -d
+
+echo "✅ Deployment complete"
+
+echo "Backend:  http://localhost:3000/api/v1/health"
+echo "Admin PWA: http://localhost:5173"
+echo "Web:      http://localhost:3001"
